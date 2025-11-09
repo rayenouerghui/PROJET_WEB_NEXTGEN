@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retours et Réclamations - NextGen</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="css/frontoffice.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">NextGen</a>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">Accueil</a></li>
+                        <li><a href="catalog.html">Jeux</a></li>
+                        <li><a href="about.html">À Propos</a></li>
+                        <li><a href="donations.html">Nos Dons</a></li>
+                        <li><a href="returns.html" class="active">Retours et Réclamations</a></li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <a href="cart.html" class="cart-icon" title="Panier">
+                        🛒
+                        <span class="cart-count">0</span>
+                    </a>
+                    <a href="account.html" class="account-icon">Mon Compte</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Returns Section -->
+    <section class="returns-section">
+        <div class="container">
+            <h1 class="page-title">Retours et Réclamations</h1>
+            
+            <div class="returns-content">
+                <div class="returns-info">
+                    <h2>Politique de Retour</h2>
+                    <p>Chez NextGen, nous nous engageons à vous offrir la meilleure expérience possible. Si vous rencontrez un problème avec votre achat, nous sommes là pour vous aider.</p>
+                    
+                    <h3>Conditions de Retour</h3>
+                    <ul>
+                        <li>Les demandes de retour doivent être effectuées dans les 14 jours suivant l'achat</li>
+                        <li>Le jeu doit être non utilisé et dans son état d'origine</li>
+                        <li>Les jeux téléchargés peuvent être remboursés sous certaines conditions</li>
+                    </ul>
+                </div>
+                
+                <div class="returns-form-container">
+                    <h2>Déposer une Réclamation</h2>
+                    <form id="returnsForm">
+                        <div class="form-group">
+                            <label>Numéro de Commande *</label>
+                            <input type="text" id="orderNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Raison du Retour *</label>
+                            <select id="returnReason" required>
+                                <option value="">Sélectionnez une raison</option>
+                                <option value="defect">Défaut du Produit</option>
+                                <option value="wrong">Mauvais Produit</option>
+                                <option value="not-working">Ne Fonctionne Pas</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Description *</label>
+                            <textarea id="returnDescription" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Soumettre la Réclamation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>NextGen</h3>
+                    <p>Plateforme de vente de jeux vidéo à vocation solidaire</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Liens Utiles</h4>
+                    <ul>
+                        <li><a href="catalog.html">Catalogue</a></li>
+                        <li><a href="about.html">À Propos</a></li>
+                        <li><a href="donations.html">Nos Dons</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="returns.html">Retours</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NextGen. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
+
