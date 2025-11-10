@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retours et Réclamations - NextGen Admin</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="css/backoffice.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <h2>NextGen Admin</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="index.html">📊 Tableau de Bord</a></li>
+                <li><a href="games.html">🎮 Gestion des Jeux</a></li>
+                <li><a href="users.html">👥 Gestion des Utilisateurs</a></li>
+                <li><a href="orders.html">🛒 Gestion des Commandes</a></li>
+                <li><a href="donations.html">💝 Gestion des Dons</a></li>
+                <li><a href="partners.html">🤝 Gestion des Partenaires</a></li>
+                <li><a href="returns.html" class="active">↩️ Retours et Réclamations</a></li>
+                <li><a href="settings.html">⚙️ Paramètres</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="../frontoffice/index.html" class="view-site">Voir le Site</a>
+            <a href="#" class="logout">Déconnexion</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1>Retours et Réclamations</h1>
+                <div class="header-actions">
+                    <span class="admin-name">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="admin-content">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-info">
+                        <h3>Réclamations en Attente</h3>
+                        <p class="stat-value" id="pendingClaims">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">↩️</div>
+                    <div class="stat-info">
+                        <h3>Retours en Attente</h3>
+                        <p class="stat-value" id="pendingReturns">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <h3>Réclamations Traitées</h3>
+                        <p class="stat-value" id="processedClaims">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <h3>Retours Validés</h3>
+                        <p class="stat-value" id="validatedReturns">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" data-tab="claims">Réclamations</button>
+                <button class="admin-tab-btn" data-tab="returns">Retours</button>
+                <button class="admin-tab-btn" data-tab="archived">Archivées</button>
+            </div>
+
+            <!-- Tab 1: Réclamations -->
+            <div id="claims" class="admin-tab-content active">
+                <div class="admin-filters">
+                    <input type="text" id="searchClaims" placeholder="Rechercher une réclamation...">
+                    <select id="claimStatusFilter">
+                        <option value="">Tous les statuts</option>
+                        <option value="pending">En Attente</option>
+                        <option value="processing">En Traitement</option>
+                        <option value="resolved">Résolu</option>
+                        <option value="rejected">Rejeté</option>
+                    </select>
+                    <select id="claimTypeFilter">
+                        <option value="">Tous les types</option>
+                        <option value="product-issue">Problème Produit</option>
+                        <option value="delivery-issue">Problème Livraison</option>
+                        <option value="payment-issue">Problème Paiement</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Client</th>
+                                <th>Commande</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="claimsTableBody">
+                            <!-- Claims will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Retours -->
+            <div id="returns" class="admin-tab-content">
+                <div class="admin-filters">
+                    <input type="text" id="searchReturns" placeholder="Rechercher un retour...">
+                    <select id="returnStatusFilter">
+                        <option value="">Tous les statuts</option>
+                        <option value="pending">En Attente</option>
+                        <option value="processing">En Traitement</option>
+                        <option value="approved">Approuvé</option>
+                        <option value="rejected">Rejeté</option>
+                        <option value="completed">Terminé</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Client</th>
+                                <th>Produit</th>
+                                <th>Commande</th>
+                                <th>Motif</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="returnsTableBody">
+                            <!-- Returns will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 3: Archivées -->
+            <div id="archived" class="admin-tab-content">
+                <div class="admin-filters">
+                    <input type="text" id="searchArchived" placeholder="Rechercher...">
+                    <select id="archivedTypeFilter">
+                        <option value="">Tous les types</option>
+                        <option value="claim">Réclamations</option>
+                        <option value="return">Retours</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Client</th>
+                                <th>Date</th>
+                                <th>Date d'Archivage</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="archivedTableBody">
+                            <!-- Archived items will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Claim Details Modal -->
+    <div class="modal" id="claimModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Détails de la Réclamation</h2>
+                <button class="modal-close" id="closeClaimModal">×</button>
+            </div>
+            <div id="claimDetails" style="padding: 30px;">
+                <!-- Claim details will be loaded here -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="respondClaimBtn">Répondre</button>
+                <button class="btn btn-success" id="resolveClaimBtn">Résoudre</button>
+                <button class="btn btn-danger" id="rejectClaimBtn">Rejeter</button>
+                <button class="btn btn-secondary" id="archiveClaimBtn">Archiver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Respond to Claim Modal -->
+    <div class="modal" id="respondClaimModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Répondre à la Réclamation</h2>
+                <button class="modal-close" id="closeRespondModal">×</button>
+            </div>
+            <form id="respondClaimForm" style="padding: 30px;">
+                <div class="form-group">
+                    <label>Réponse *</label>
+                    <textarea id="claimResponse" rows="6" required placeholder="Tapez votre réponse..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Nouveau Statut *</label>
+                    <select id="newClaimStatus" required>
+                        <option value="">Sélectionnez un statut</option>
+                        <option value="processing">En Traitement</option>
+                        <option value="resolved">Résolu</option>
+                        <option value="rejected">Rejeté</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Envoyer la Réponse</button>
+                    <button type="button" class="btn btn-secondary" id="cancelRespondBtn">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Return Details Modal -->
+    <div class="modal" id="returnModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Détails du Retour</h2>
+                <button class="modal-close" id="closeReturnModal">×</button>
+            </div>
+            <div id="returnDetails" style="padding: 30px;">
+                <!-- Return details will be loaded here -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-success" id="approveReturnBtn">Valider le Retour</button>
+                <button class="btn btn-danger" id="rejectReturnBtn">Refuser le Retour</button>
+                <button class="btn btn-secondary" id="archiveReturnBtn">Archiver</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Modal Controls
+        const claimModal = document.getElementById('claimModal');
+        const returnModal = document.getElementById('returnModal');
+        const respondModal = document.getElementById('respondClaimModal');
+
+        // Close Modals
+        document.getElementById('closeClaimModal')?.addEventListener('click', () => {
+            claimModal.classList.remove('active');
+        });
+
+        document.getElementById('closeReturnModal')?.addEventListener('click', () => {
+            returnModal.classList.remove('active');
+        });
+
+        document.getElementById('closeRespondModal')?.addEventListener('click', () => {
+            respondModal.classList.remove('active');
+        });
+
+        document.getElementById('cancelRespondBtn')?.addEventListener('click', () => {
+            respondModal.classList.remove('active');
+        });
+
+        // Open Respond Modal
+        document.getElementById('respondClaimBtn')?.addEventListener('click', () => {
+            claimModal.classList.remove('active');
+            respondModal.classList.add('active');
+        });
+
+        // Respond to Claim Form
+        document.getElementById('respondClaimForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const response = document.getElementById('claimResponse').value;
+            const newStatus = document.getElementById('newClaimStatus').value;
+            
+            if (response && newStatus) {
+                alert('Réponse envoyée avec succès. Le statut a été mis à jour.');
+                respondModal.classList.remove('active');
+                document.getElementById('respondClaimForm').reset();
+            }
+        });
+
+        // Resolve Claim
+        document.getElementById('resolveClaimBtn')?.addEventListener('click', () => {
+            if (confirm('Êtes-vous sûr de vouloir résoudre cette réclamation ?')) {
+                alert('Réclamation résolue avec succès.');
+                claimModal.classList.remove('active');
+            }
+        });
+
+        // Reject Claim
+        document.getElementById('rejectClaimBtn')?.addEventListener('click', () => {
+            if (confirm('Êtes-vous sûr de vouloir rejeter cette réclamation ?')) {
+                alert('Réclamation rejetée.');
+                claimModal.classList.remove('active');
+            }
+        });
+
+        // Archive Claim
+        document.getElementById('archiveClaimBtn')?.addEventListener('click', () => {
+            if (confirm('Êtes-vous sûr de vouloir archiver cette réclamation ?')) {
+                alert('Réclamation archivée avec succès.');
+                claimModal.classList.remove('active');
+            }
+        });
+
+        // Approve Return
+        document.getElementById('approveReturnBtn')?.addEventListener('click', () => {
+            if (confirm('Valider ce retour mettra à jour le stock automatiquement. Continuer ?')) {
+                alert('Retour validé. Le stock a été mis à jour.');
+                returnModal.classList.remove('active');
+            }
+        });
+
+        // Reject Return
+        document.getElementById('rejectReturnBtn')?.addEventListener('click', () => {
+            if (confirm('Êtes-vous sûr de vouloir refuser ce retour ?')) {
+                alert('Retour refusé.');
+                returnModal.classList.remove('active');
+            }
+        });
+
+        // Archive Return
+        document.getElementById('archiveReturnBtn')?.addEventListener('click', () => {
+            if (confirm('Êtes-vous sûr de vouloir archiver ce retour ?')) {
+                alert('Retour archivé avec succès.');
+                returnModal.classList.remove('active');
+            }
+        });
+
+        // View Claim Details (example)
+        function viewClaim(claimId) {
+            claimModal.classList.add('active');
+            // In a real application, this would fetch claim details from an API
+            document.getElementById('claimDetails').innerHTML = `
+                <div class="claim-detail-item">
+                    <strong>ID:</strong> ${claimId}
+                </div>
+                <div class="claim-detail-item">
+                    <strong>Client:</strong> Client Name
+                </div>
+                <div class="claim-detail-item">
+                    <strong>Type:</strong> Problème Produit
+                </div>
+                <div class="claim-detail-item">
+                    <strong>Description:</strong> Description de la réclamation...
+                </div>
+                <div class="claim-detail-item">
+                    <strong>Statut:</strong> <span class="status-badge pending">En Attente</span>
+                </div>
+                <div class="claim-detail-item">
+                    <strong>Date:</strong> 2024-01-15
+                </div>
+            `;
+        }
+
+        // View Return Details (example)
+        function viewReturn(returnId) {
+            returnModal.classList.add('active');
+            // In a real application, this would fetch return details from an API
+            document.getElementById('returnDetails').innerHTML = `
+                <div class="return-detail-item">
+                    <strong>ID:</strong> ${returnId}
+                </div>
+                <div class="return-detail-item">
+                    <strong>Client:</strong> Client Name
+                </div>
+                <div class="return-detail-item">
+                    <strong>Produit:</strong> Nom du Produit
+                </div>
+                <div class="return-detail-item">
+                    <strong>Motif:</strong> Défaut du Produit
+                </div>
+                <div class="return-detail-item">
+                    <strong>Description:</strong> Description du retour...
+                </div>
+                <div class="return-detail-item">
+                    <strong>Statut:</strong> <span class="status-badge pending">En Attente</span>
+                </div>
+                <div class="return-detail-item">
+                    <strong>Date:</strong> 2024-01-15
+                </div>
+            `;
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+    </script>
+
+</body>
+</html>
+
