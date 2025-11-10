@@ -43,42 +43,177 @@
         <div class="container">
             <h1 class="page-title">Retours et Réclamations</h1>
             
-            <div class="returns-content">
-                <div class="returns-info">
-                    <h2>Politique de Retour</h2>
-                    <p>Chez NextGen, nous nous engageons à vous offrir la meilleure expérience possible. Si vous rencontrez un problème avec votre achat, nous sommes là pour vous aider.</p>
+            <!-- Tabs Navigation -->
+            <div class="returns-tabs">
+                <button class="tab-btn active" data-tab="make-claim">Faire une Réclamation</button>
+                <button class="tab-btn" data-tab="track-status">Suivre l'État d'une Réclamation</button>
+                <button class="tab-btn" data-tab="request-return">Demander un Retour</button>
+                <button class="tab-btn" data-tab="my-returns">Mes Retours</button>
+            </div>
+
+            <!-- Tab 1: Faire une Réclamation -->
+            <div id="make-claim" class="returns-tab-content active">
+                <div class="returns-content">
+                    <div class="returns-info">
+                        <h2>Déposer une Réclamation</h2>
+                        <p>Si vous rencontrez un problème avec votre commande, vous pouvez déposer une réclamation. Notre équipe traitera votre demande dans les plus brefs délais.</p>
+                    </div>
                     
-                    <h3>Conditions de Retour</h3>
-                    <ul>
-                        <li>Les demandes de retour doivent être effectuées dans les 14 jours suivant l'achat</li>
-                        <li>Le jeu doit être non utilisé et dans son état d'origine</li>
-                        <li>Les jeux téléchargés peuvent être remboursés sous certaines conditions</li>
-                    </ul>
+                    <div class="returns-form-container">
+                        <form id="claimForm">
+                            <div class="form-group">
+                                <label>Numéro de Commande *</label>
+                                <input type="text" id="claimOrderNumber" required placeholder="Ex: CMD-2024-001">
+                            </div>
+                            <div class="form-group">
+                                <label>Type de Réclamation *</label>
+                                <select id="claimType" required>
+                                    <option value="">Sélectionnez un type</option>
+                                    <option value="product-issue">Problème avec le Produit</option>
+                                    <option value="delivery-issue">Problème de Livraison</option>
+                                    <option value="payment-issue">Problème de Paiement</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Description de la Réclamation *</label>
+                                <textarea id="claimDescription" rows="6" required placeholder="Décrivez en détail votre réclamation..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Pièces Jointes (optionnel)</label>
+                                <input type="file" id="claimAttachments" multiple accept="image/*,.pdf">
+                                <small>Vous pouvez joindre des photos ou documents (max 5MB par fichier)</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Soumettre la Réclamation</button>
+                        </form>
+                    </div>
                 </div>
-                
-                <div class="returns-form-container">
-                    <h2>Déposer une Réclamation</h2>
-                    <form id="returnsForm">
+            </div>
+
+            <!-- Tab 2: Suivre l'État d'une Réclamation -->
+            <div id="track-status" class="returns-tab-content">
+                <div class="returns-content">
+                    <div class="returns-info">
+                        <h2>Suivre l'État de vos Réclamations</h2>
+                        <p>Consultez le statut de toutes vos réclamations et suivez leur progression.</p>
+                    </div>
+                    
+                    <div class="returns-form-container">
                         <div class="form-group">
-                            <label>Numéro de Commande *</label>
-                            <input type="text" id="orderNumber" required>
+                            <label>Numéro de Réclamation</label>
+                            <input type="text" id="trackClaimNumber" placeholder="Ex: REC-2024-001">
+                            <button type="button" class="btn btn-primary mt-20" id="searchClaimBtn">Rechercher</button>
                         </div>
-                        <div class="form-group">
-                            <label>Raison du Retour *</label>
-                            <select id="returnReason" required>
-                                <option value="">Sélectionnez une raison</option>
-                                <option value="defect">Défaut du Produit</option>
-                                <option value="wrong">Mauvais Produit</option>
-                                <option value="not-working">Ne Fonctionne Pas</option>
-                                <option value="other">Autre</option>
-                            </select>
+                        
+                        <div id="claimStatusResult" class="claim-status-result" style="display: none;">
+                            <h3>Détails de la Réclamation</h3>
+                            <div class="status-timeline" id="statusTimeline">
+                                <!-- Timeline will be loaded here -->
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Description *</label>
-                            <textarea id="returnDescription" rows="5" required></textarea>
+
+                        <div class="my-claims-list" id="myClaimsList">
+                            <h3>Mes Réclamations</h3>
+                            <div class="claims-table-container">
+                                <table class="claims-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="claimsTableBody">
+                                        <!-- Claims will be loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Soumettre la Réclamation</button>
-                    </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Demander un Retour -->
+            <div id="request-return" class="returns-tab-content">
+                <div class="returns-content">
+                    <div class="returns-info">
+                        <h2>Demander un Retour</h2>
+                        <p>Vous pouvez demander le retour d'un produit dans les 14 jours suivant votre achat. Le stock sera automatiquement mis à jour après validation de votre demande.</p>
+                        
+                        <h3>Conditions de Retour</h3>
+                        <ul>
+                            <li>Les demandes de retour doivent être effectuées dans les 14 jours suivant l'achat</li>
+                            <li>Le jeu doit être non utilisé et dans son état d'origine</li>
+                            <li>Les jeux téléchargés peuvent être remboursés sous certaines conditions</li>
+                            <li>Le produit doit être dans son emballage d'origine</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="returns-form-container">
+                        <form id="returnRequestForm">
+                            <div class="form-group">
+                                <label>Numéro de Commande *</label>
+                                <input type="text" id="returnOrderNumber" required placeholder="Ex: CMD-2024-001">
+                            </div>
+                            <div class="form-group">
+                                <label>Produit à Retourner *</label>
+                                <select id="returnProduct" required>
+                                    <option value="">Sélectionnez un produit</option>
+                                    <!-- Products will be loaded dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Motif du Retour *</label>
+                                <select id="returnMotif" required>
+                                    <option value="">Sélectionnez un motif</option>
+                                    <option value="defect">Défaut du Produit</option>
+                                    <option value="wrong">Mauvais Produit Reçu</option>
+                                    <option value="not-working">Ne Fonctionne Pas</option>
+                                    <option value="not-satisfied">Non Satisfait</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Description Détaillée *</label>
+                                <textarea id="returnDescription" rows="5" required placeholder="Décrivez la raison de votre retour..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Demander le Retour</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Mes Retours -->
+            <div id="my-returns" class="returns-tab-content">
+                <div class="returns-content">
+                    <div class="returns-info">
+                        <h2>Mes Demandes de Retour</h2>
+                        <p>Consultez toutes vos demandes de retour et leur statut. Vous pouvez annuler une demande de retour si elle est encore en attente.</p>
+                    </div>
+                    
+                    <div class="returns-form-container">
+                        <div class="my-returns-list" id="myReturnsList">
+                            <div class="returns-table-container">
+                                <table class="returns-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Date de Demande</th>
+                                            <th>Produit</th>
+                                            <th>Motif</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="returnsTableBody">
+                                        <!-- Returns will be loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,6 +249,46 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.returns-tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Claim Form Submission
+        document.getElementById('claimForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Votre réclamation a été soumise avec succès. Vous recevrez un email de confirmation.');
+            e.target.reset();
+        });
+
+        // Return Request Form Submission
+        document.getElementById('returnRequestForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Votre demande de retour a été soumise avec succès. Le stock sera mis à jour après validation.');
+            e.target.reset();
+        });
+
+        // Search Claim
+        document.getElementById('searchClaimBtn')?.addEventListener('click', () => {
+            const claimNumber = document.getElementById('trackClaimNumber').value;
+            if (claimNumber) {
+                document.getElementById('claimStatusResult').style.display = 'block';
+                // In a real application, this would fetch data from an API
+            }
+        });
+    </script>
 
 </body>
 </html>
