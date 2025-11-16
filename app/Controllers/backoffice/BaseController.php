@@ -9,7 +9,7 @@ class BaseController {
     public function view($view, $data = []) {
         extract($data);
         
-        $viewPath = __DIR__ . '/../views/' . $view . '.php';
+        $viewPath = __DIR__ . '/../../Views/backoffice/' . $view . '.php';
         if(file_exists($viewPath)) {
             require_once $viewPath;
         } else {
