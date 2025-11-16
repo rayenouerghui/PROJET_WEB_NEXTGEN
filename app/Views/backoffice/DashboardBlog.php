@@ -313,7 +313,7 @@ if (isset($_GET['success'])) {
                                     </button>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="delete_article" value="<?php echo $article['id_article']; ?>">
-                                        <button type="submit" class="btn btn-delete" onclick="return confirm(' Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.')">
+                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.')">
                                             Supprimer
                                         </button>
                                     </form>
@@ -429,7 +429,7 @@ if (isset($_GET['success'])) {
                 <div class="form-group">
                     <label for="edit_image">Nouvelle image (laisser vide pour garder l'actuelle)</label>
                     <div class="file-input-wrapper">
-                        <span class="file-input-button"> Choisir une nouvelle image</span>
+                        <span class="file-input-button">Choisir une nouvelle image</span>
                         <input type="file" id="edit_image" name="image" accept="image/*" onchange="previewImage(this, 'preview-edit')">
                     </div>
                     <div id="file-name-edit" class="file-name"></div>
