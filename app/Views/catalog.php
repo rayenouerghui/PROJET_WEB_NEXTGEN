@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catalogue - NextGen</title>
-    <link rel="stylesheet" href="../../public/css/common.css">
-    <link rel="stylesheet" href="../../public/css/frontoffice.css">
+    <link rel="stylesheet" href="../../public/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -58,16 +57,16 @@
                     <h4>Liens Utiles</h4>
                     <ul>
                         <li><a href="catalog.php">Catalogue</a></li>
-                        <li><a href="about.html">À Propos</a></li>
-                        <li><a href="donations.html">Nos Dons</a></li>
+                        <li><a href="about.php">À Propos</a></li>
+                        <li><a href="donations.php">Nos Dons</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Support</h4>
                     <ul>
-                        <li><a href="contact.html">Contact</a></li>
-                        <li><a href="returns.html">Retours</a></li>
-                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="contact.php">Contact</a></li>
+                        <li><a href="returns.php">Retours</a></li>
+                        <li><a href="faq.php">FAQ</a></li>
                     </ul>
                 </div>
             </div>

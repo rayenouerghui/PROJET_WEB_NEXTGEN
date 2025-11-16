@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NextGen - Accueil</title>
-    <link rel="stylesheet" href="../../public/css/common.css">
-    <link rel="stylesheet" href="../../public/css/frontoffice.css">
+    <link rel="stylesheet" href="../../public/css/style.css?v=<?php echo time(); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -21,7 +20,7 @@
                 <p>Jouer pour Espérer</p>
                 <div class="hero-buttons">
                     <a href="catalog.php" class="btn btn-primary btn-large">Voir le Catalogue</a>
-                    <a href="about.html" class="btn btn-secondary btn-large">En Savoir Plus</a>
+                    <a href="about.php" class="btn btn-secondary btn-large">En Savoir Plus</a>
                 </div>
             </div>
         </div>
@@ -60,16 +59,16 @@
                     <h4>Liens Utiles</h4>
                     <ul>
                         <li><a href="catalog.php">Catalogue</a></li>
-                        <li><a href="about.html">À Propos</a></li>
-                        <li><a href="donations.html">Nos Dons</a></li>
+                        <li><a href="about.php">À Propos</a></li>
+                        <li><a href="donations.php">Nos Dons</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Support</h4>
                     <ul>
-                        <li><a href="contact.html">Contact</a></li>
-                        <li><a href="returns.html">Retours</a></li>
-                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="contact.php">Contact</a></li>
+                        <li><a href="returns.php">Retours</a></li>
+                        <li><a href="faq.php">FAQ</a></li>
                     </ul>
                 </div>
             </div>
@@ -96,6 +95,63 @@
         });
     </script>
     <style>
+        /* Force test - if you see red text, inline CSS works */
+        .main-nav a {
+            position: relative !important;
+            padding: 8px 0 !important;
+        }
+        
+        .main-nav a::before {
+            content: '' !important;
+            position: absolute !important;
+            bottom: 0 !important;
+            left: 50% !important;
+            width: 0 !important;
+            height: 3px !important;
+            background: var(--primary-color) !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transform: translateX(-50%) !important;
+            border-radius: 2px !important;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4) !important;
+        }
+        
+        .main-nav a:hover::before {
+            width: 100% !important;
+            left: 0 !important;
+            transform: translateX(0) !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.6) !important;
+        }
+        
+        .main-nav a:hover {
+            color: var(--primary-color) !important;
+            transform: translateY(-3px) !important;
+            text-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+        }
+        
+        /* Hero background image */
+        .hero {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.85) 0%, rgba(234, 88, 12, 0.85) 100%),
+                        url('../../public/images/background_gaming1.jpg') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            background-attachment: fixed !important;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-content h1 {
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5),
+                         0 0 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero-content p {
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+        
         .hero-buttons {
             display: flex;
             gap: 20px;

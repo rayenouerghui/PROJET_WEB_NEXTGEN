@@ -37,10 +37,12 @@ class config
 
                 );
 
+            } catch (PDOException $e) {
+                error_log("config::getConnexion - PDO Exception: " . $e->getMessage());
+                throw new Exception('Erreur de connexion à la base de données: ' . $e->getMessage());
             } catch (Exception $e) {
-
-                die('Erreur: ' . $e->getMessage());
-
+                error_log("config::getConnexion - General Exception: " . $e->getMessage());
+                throw $e;
             }
 
         }

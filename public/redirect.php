@@ -27,7 +27,7 @@ switch ($page) {
         header('Location: ../app/Views/index.php');
         break;
     default:
-        header('Location: ../app/Views/' . $page . '.html');
+        header('Location: ../app/Views/' . $page . '.php');
         break;
 }
 exit;

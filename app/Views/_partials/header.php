@@ -15,22 +15,22 @@ $userCredit = $isLoggedIn ? $currentUser['credit'] : 0;
     <div class="container">
         <div class="header-content">
             <div class="logo">
-                <a href="index.html">
+                <a href="index.php">
                     <img src="../../public/images/logo.png" alt="NextGen Logo" class="logo-img">
                     NextGen
                 </a>
             </div>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="index.html">Accueil</a></li>
-                    <li><a href="catalog.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'catalog.html' || basename($_SERVER['PHP_SELF']) == 'catalog.php') ? 'active' : ''; ?>">Jeux</a></li>
-                    <li><a href="about.html">À Propos</a></li>
-                    <li><a href="donations.html">Nos Dons</a></li>
-                    <li><a href="returns.html">Retours et Réclamations</a></li>
+                    <li><a href="index.php">Accueil</a></li>
+                    <li><a href="catalog.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'catalog.php') ? 'active' : ''; ?>">Jeux</a></li>
+                    <li><a href="about.php">À Propos</a></li>
+                    <li><a href="donations.php">Nos Dons</a></li>
+                    <li><a href="returns.php">Retours et Réclamations</a></li>
                 </ul>
             </nav>
             <div class="header-actions">
-                <a href="cart.html" class="cart-icon" title="Panier">
+                <a href="cart.php" class="cart-icon" title="Panier">
                     🛒
                     <span class="cart-count">0</span>
                 </a>
@@ -52,7 +52,7 @@ $userCredit = $isLoggedIn ? $currentUser['credit'] : 0;
                         </div>
                         <div class="dropdown-divider"></div>
                         <?php if ($isLoggedIn): ?>
-                            <a href="account.html" class="dropdown-item">Mon Compte</a>
+                            <a href="account.php" class="dropdown-item">Mon Compte</a>
                             <a href="settings.php" class="dropdown-item">Modifier les informations</a>
                             <a href="#" class="dropdown-item" id="logoutBtn">Déconnexion</a>
                         <?php else: ?>
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            window.location.href = 'index.html';
+                            window.location.href = 'index.php';
                         }
                     });
             });

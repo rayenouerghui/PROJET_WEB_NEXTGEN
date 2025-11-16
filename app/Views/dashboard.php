@@ -9,8 +9,7 @@ $authController->requireAdmin();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - NextGen</title>
-    <link rel="stylesheet" href="../../public/css/common.css">
-    <link rel="stylesheet" href="../../public/css/backoffice.css">
+    <link rel="stylesheet" href="../../public/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -24,14 +23,14 @@ $authController->requireAdmin();
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="dashboard.php" class="active">📊 Tableau de Bord</a></li>
-                    <li><a href="games.html">🎮 Gestion des Jeux</a></li>
-                    <li><a href="users.html">👥 Gestion des Utilisateurs</a></li>
-                    <li><a href="orders.html">🛒 Gestion des Commandes</a></li>
-                    <li><a href="settings.html">⚙️ Paramètres</a></li>
+                    <li><a href="games.php">🎮 Gestion des Jeux</a></li>
+                    <li><a href="users.php">👥 Gestion des Utilisateurs</a></li>
+                    <li><a href="orders.php">🛒 Gestion des Commandes</a></li>
+                    <li><a href="settings-admin.php">⚙️ Paramètres</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
-                <a href="../frontoffice/index.html" class="view-site">Voir le Site</a>
+                <a href="index.php" class="view-site">Voir le Site</a>
                 <a href="#" class="logout" id="logoutBtn">Déconnexion</a>
             </div>
         </aside>
@@ -243,7 +242,7 @@ $authController->requireAdmin();
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = '../frontoffice/index.html';
+                        window.location.href = 'index.php';
                     }
                 });
         });

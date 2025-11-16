@@ -26,7 +26,29 @@ class AuthController {
             }
             
             // Email exists, now verify password
-            if (!isset($user['mot_de_passe']) || !password_verify($password, $user['mot_de_passe'])) {
+            if (!isset($user['mot_de_passe'])) {
+                return ['success' => false, 'message' => 'Mot de passe incorrect'];
+            }
+            
+            // Check if password is hashed (starts with $2y$, $2a$, etc.) or plain text
+            $storedPassword = $user['mot_de_passe'];
+            $passwordValid = false;
+            
+            // If password looks like a hash (bcrypt format), use password_verify
+            if (preg_match('/^\$2[ayb]\$.{56}$/', $storedPassword)) {
+                $passwordValid = password_verify($password, $storedPassword);
+            } else {
+                // Plain text password comparison (for existing users)
+                $passwordValid = ($password === $storedPassword);
+                
+                // If plain text matches, upgrade to hashed password for security
+                if ($passwordValid) {
+                    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                    $this->userModel->updatePassword($user['id_user'], $hashedPassword);
+                }
+            }
+            
+            if (!$passwordValid) {
                 return ['success' => false, 'message' => 'Mot de passe incorrect'];
             }
             
@@ -71,9 +93,17 @@ class AuthController {
                 return ['success' => false, 'message' => 'Cet email est déjà utilisé'];
             }
             
-            if ($this->userModel->createUser($email, $password, $nom, $prenom)) {
+            $createResult = $this->userModel->createUser($email, $password, $nom, $prenom);
+            
+            if ($createResult) {
                 // Auto login after registration
                 $user = $this->userModel->getUserByEmail($email);
+                
+                if (!$user) {
+                    error_log("AuthController::register - User created but getUserByEmail returned false");
+                    return ['success' => false, 'message' => 'Utilisateur créé mais impossible de récupérer les informations'];
+                }
+                
                 if (session_status() === PHP_SESSION_NONE) {
                     session_start();
                 }
@@ -86,7 +116,8 @@ class AuthController {
                 
                 return ['success' => true, 'message' => 'Inscription réussie'];
             } else {
-                return ['success' => false, 'message' => 'Erreur lors de l\'inscription'];
+                error_log("AuthController::register - createUser returned false");
+                return ['success' => false, 'message' => 'Erreur lors de l\'inscription. Vérifiez que la base de données est accessible.'];
             }
         }
         return ['success' => false, 'message' => 'Méthode non autorisée'];
