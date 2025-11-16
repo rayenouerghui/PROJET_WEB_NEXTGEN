@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../../backoffice/models/AttenteMatchModel.php';
-require_once __DIR__ . '/../../backoffice/models/SessionMatchModel.php';
-require_once __DIR__ . '/../../backoffice/services/MatchService.php';
-require_once __DIR__ . '/../../backoffice/config/db.php';
+require_once __DIR__ . '/../../Models/backoffice/AttenteMatchModel.php';
+require_once __DIR__ . '/../../Models/backoffice/SessionMatchModel.php';
+require_once __DIR__ . '/../backoffice/services/MatchService.php';
+require_once __DIR__ . '/../../../config/db.php';
 
 class MatchController {
     private $attenteModel;
@@ -155,12 +155,11 @@ class MatchController {
             $db = Database::getInstance()->getConnection();
             
             $stmt = $db->prepare("
-                SELECT DISTINCT j.id_jeu, j.nom, j.image_url, j.categorie, j.prix
-                FROM commandes c
-                INNER JOIN jeux j ON c.id_jeu = j.id_jeu
-                WHERE c.id_utilisateur = :id_utilisateur
-                AND c.statut IN ('confirmee', 'livree')
-                ORDER BY c.date_commande DESC
+                SELECT DISTINCT j.id_jeu, j.titre AS nom, j.src_img AS image_url, '' AS categorie, j.prix
+                FROM jeu_achete ja
+                INNER JOIN jeu j ON ja.jeu_id = j.id_jeu
+                WHERE ja.user_id = :id_utilisateur
+                ORDER BY ja.date_achat DESC
             ");
             $stmt->execute([':id_utilisateur' => $idUtilisateur]);
             
@@ -221,12 +220,11 @@ class MatchController {
         try {
             $db = Database::getInstance()->getConnection();
             $stmt = $db->prepare("
-                SELECT DISTINCT j.id_jeu, j.nom, j.image_url, j.categorie, j.prix
-                FROM commandes c
-                INNER JOIN jeux j ON c.id_jeu = j.id_jeu
-                WHERE c.id_utilisateur = :id_utilisateur
-                AND c.statut IN ('confirmee', 'livree')
-                ORDER BY c.date_commande DESC
+                SELECT DISTINCT j.id_jeu, j.titre AS nom, j.src_img AS image_url, '' AS categorie, j.prix
+                FROM jeu_achete ja
+                INNER JOIN jeu j ON ja.jeu_id = j.id_jeu
+                WHERE ja.user_id = :id_utilisateur
+                ORDER BY ja.date_achat DESC
             ");
             $stmt->execute([':id_utilisateur' => $idUtilisateur]);
             $jeux = $stmt->fetchAll();
@@ -253,7 +251,7 @@ class MatchController {
             $sessionPageUrl = '../session.php?uuid=' . urlencode($sessionUuid);
         }
         
-        require_once __DIR__ . '/../views/matchmaking_view.php';
+        require_once __DIR__ . '/../../Views/frontoffice/matchmaking_view.php';
     }
     
     public function afficherSession() {
@@ -289,7 +287,7 @@ class MatchController {
             }
         }
         
-        require_once __DIR__ . '/../views/session_view.php';
+        require_once __DIR__ . '/../../Views/frontoffice/session_view.php';
     }
 }
 

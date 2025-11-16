@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../../../config/db.php';
 
 class AttenteMatchModel {
     private $db;
@@ -13,8 +13,8 @@ class AttenteMatchModel {
     public function ajouterAttente($idUtilisateur, $idJeu) {
         try {
             $stmt = $this->db->prepare("
-                SELECT id_attente FROM AttenteMatch 
-                WHERE id_utilisateur = :id_utilisateur 
+                SELECT id_attente FROM attentematch 
+                WHERE id_user = :id_utilisateur 
                 AND id_jeu = :id_jeu 
                 AND matched = FALSE
             ");
@@ -28,7 +28,7 @@ class AttenteMatchModel {
             }
             
             $stmt = $this->db->prepare("
-                INSERT INTO AttenteMatch (id_utilisateur, id_jeu, date_ajout, matched)
+                INSERT INTO attentematch (id_user, id_jeu, date_ajout, matched)
                 VALUES (:id_utilisateur, :id_jeu, NOW(), FALSE)
             ");
             
@@ -47,10 +47,10 @@ class AttenteMatchModel {
     public function getAttentesParJeu($idJeu, $limit = 2) {
         try {
             $stmt = $this->db->prepare("
-                SELECT a.*, u.email, u.nom, u.prenom, j.nom as nom_jeu
-                FROM AttenteMatch a
-                INNER JOIN utilisateurs u ON a.id_utilisateur = u.id_utilisateur
-                INNER JOIN jeux j ON a.id_jeu = j.id_jeu
+                SELECT a.*, u.email, u.nom, u.prenom, j.titre AS nom_jeu
+                FROM attentematch a
+                INNER JOIN utilisateur u ON a.id_user = u.id_user
+                INNER JOIN jeu j ON a.id_jeu = j.id_jeu
                 WHERE a.id_jeu = :id_jeu 
                 AND a.matched = FALSE
                 ORDER BY a.date_ajout ASC
@@ -91,10 +91,9 @@ class AttenteMatchModel {
         try {
             $stmt = $this->db->prepare("
                 SELECT COUNT(*) as count
-                FROM commandes
-                WHERE id_utilisateur = :id_utilisateur
-                AND id_jeu = :id_jeu
-                AND statut IN ('confirmee', 'livree')
+                FROM jeu_achete
+                WHERE user_id = :id_utilisateur
+                AND jeu_id = :id_jeu
             ");
             $stmt->execute([
                 ':id_utilisateur' => $idUtilisateur,
@@ -112,10 +111,10 @@ class AttenteMatchModel {
     public function getAllAttentesActives() {
         try {
             $stmt = $this->db->prepare("
-                SELECT a.*, u.email, u.nom, u.prenom, j.nom as nom_jeu
-                FROM AttenteMatch a
-                INNER JOIN utilisateurs u ON a.id_utilisateur = u.id_utilisateur
-                INNER JOIN jeux j ON a.id_jeu = j.id_jeu
+                SELECT a.*, u.email, u.nom, u.prenom, j.titre AS nom_jeu
+                FROM attentematch a
+                INNER JOIN utilisateur u ON a.id_user = u.id_user
+                INNER JOIN jeu j ON a.id_jeu = j.id_jeu
                 WHERE a.matched = FALSE
                 ORDER BY a.date_ajout DESC
             ");
@@ -131,7 +130,7 @@ class AttenteMatchModel {
     public function nettoyerAnciennesAttentes($joursAncien = 7) {
         try {
             $stmt = $this->db->prepare("
-                DELETE FROM AttenteMatch
+                DELETE FROM attentematch
                 WHERE matched = TRUE
                 AND date_ajout < DATE_SUB(NOW(), INTERVAL :jours DAY)
             ");
@@ -146,7 +145,7 @@ class AttenteMatchModel {
     
     public function supprimerAttente($idAttente) {
         try {
-            $stmt = $this->db->prepare("DELETE FROM AttenteMatch WHERE id_attente = :id_attente");
+            $stmt = $this->db->prepare("DELETE FROM attentematch WHERE id_attente = :id_attente");
             return $stmt->execute([':id_attente' => $idAttente]);
         } catch (PDOException $e) {
             error_log("Erreur AttenteMatchModel::supprimerAttente: " . $e->getMessage());

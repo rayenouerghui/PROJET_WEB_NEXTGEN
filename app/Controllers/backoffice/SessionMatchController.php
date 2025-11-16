@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../models/SessionMatchModel.php';
+require_once __DIR__ . '/../../Models/backoffice/SessionMatchModel.php';
 
 class SessionMatchController {
     private $sessionModel;

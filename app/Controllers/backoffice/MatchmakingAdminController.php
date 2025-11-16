@@ -12,13 +12,12 @@ class MatchmakingAdminController extends BaseController {
     private $matchService;
     
     public function __construct() {
-        parent::__construct();
         try {
             $this->attenteController = new AttenteMatchController();
             $this->sessionController = new SessionMatchController();
-            require_once __DIR__ . '/../models/AttenteMatchModel.php';
-            require_once __DIR__ . '/../models/SessionMatchModel.php';
-            require_once __DIR__ . '/../services/MatchService.php';
+            require_once __DIR__ . '/../../Models/backoffice/AttenteMatchModel.php';
+            require_once __DIR__ . '/../../Models/backoffice/SessionMatchModel.php';
+            require_once __DIR__ . '/services/MatchService.php';
             $this->attenteModel = new AttenteMatchModel();
             $this->sessionModel = new SessionMatchModel();
             $this->matchService = new MatchService();

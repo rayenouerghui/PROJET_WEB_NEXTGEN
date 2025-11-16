@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../models/AttenteMatchModel.php';
-require_once __DIR__ . '/../models/SessionMatchModel.php';
-require_once __DIR__ . '/../services/MatchService.php';
+require_once __DIR__ . '/../../Models/backoffice/AttenteMatchModel.php';
+require_once __DIR__ . '/../../Models/backoffice/SessionMatchModel.php';
+require_once __DIR__ . '/services/MatchService.php';
 
 class AttenteMatchController {
     private $attenteModel;

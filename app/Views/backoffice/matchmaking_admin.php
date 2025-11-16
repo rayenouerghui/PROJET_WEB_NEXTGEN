@@ -1,3 +1,16 @@
+<?php
+// Récupération éventuelle du lien Discord global pour l'affichage admin
+$adminDiscordLink = null;
+$configFile = __DIR__ . '/../../../config/discord.php';
+
+if (file_exists($configFile)) {
+    $config = require $configFile;
+    if (isset($config['server_invite_code']) && !empty($config['server_invite_code']) && $config['server_invite_code'] !== 'VOTRE_CODE_ICI') {
+        $adminDiscordLink = 'https://discord.gg/' . $config['server_invite_code'];
+    }
+}
+?>
+
 <style>
 .error-message {
     color: #ef4444;
@@ -166,7 +179,13 @@
                                 <td><?php echo $session['id_session']; ?></td>
                                 <td><?php echo htmlspecialchars($session['nom_jeu']); ?></td>
                                 <td><?php echo count($session['participants']); ?> joueur(s)</td>
-                                <td><a href="<?php echo htmlspecialchars($session['lien_session']); ?>" target="_blank">Lien</a></td>
+                                <td>
+                                    <?php if (!empty($adminDiscordLink)): ?>
+                                        <a href="<?php echo htmlspecialchars($adminDiscordLink); ?>" target="_blank">Discord</a>
+                                    <?php else: ?>
+                                        <a href="<?php echo htmlspecialchars($session['lien_session']); ?>" target="_blank">Lien</a>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?php echo date('d/m/Y H:i', strtotime($session['date_creation'])); ?></td>
                                 <td>
                                     <form method="POST" style="display: inline-block;">

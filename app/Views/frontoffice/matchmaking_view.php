@@ -50,10 +50,6 @@
                             <span>Rejoindre Discord</span>
                         </a>
                     <?php endif; ?>
-                    <a href="<?php echo htmlspecialchars($sessionPageUrl); ?>" class="session-link">
-                        <span>🎮</span>
-                        <span>Voir la Session</span>
-                    </a>
                 </div>
             </div>
         <?php endif; ?>
