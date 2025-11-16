@@ -1,12 +1,15 @@
 body {
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
 }
 
 .games-matchmaking-list {
     max-width: 1400px;
-    margin: 0 auto;
-    padding: 32px;
+    margin: 40px auto;
+    padding: 32px 24px 48px;
 }
 
 .page-header {
@@ -16,6 +19,8 @@ body {
     background: white;
     border-radius: 20px;
     box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
 }
 
 .page-title {
@@ -35,11 +40,31 @@ body {
     margin: 0 auto;
 }
 
+/* Subtle glow behind the header content */
+.page-header::before {
+    content: '';
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
+    top: -80px;
+    right: -80px;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
 .games-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
     margin-bottom: 32px;
+}
+
+/* Space between header, possible alerts and grid */
+.games-matchmaking-list .alert {
+    max-width: 900px;
+    margin: 0 auto 24px;
 }
 
 .game-card {
@@ -367,6 +392,7 @@ body {
     background: white;
     border-radius: 20px;
     box-shadow: var(--shadow-md);
+    margin-top: 16px;
 }
 
 .empty-games-icon {
@@ -391,7 +417,7 @@ body {
 
 @media (max-width: 768px) {
     .games-matchmaking-list {
-        padding: 16px;
+        padding: 16px 12px 32px;
     }
 
     .games-grid {

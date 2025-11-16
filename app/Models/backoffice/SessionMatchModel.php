@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../../../config/db.php';
 
 class SessionMatchModel {
     private $db;
@@ -15,7 +15,7 @@ class SessionMatchModel {
             $participantsJson = json_encode($participants);
             
             $stmt = $this->db->prepare("
-                INSERT INTO SessionMatch (id_jeu, lien_session, date_creation, participants, statut)
+                INSERT INTO sessionmatch (id_jeu, lien_session, date_creation, participants, statut)
                 VALUES (:id_jeu, :lien_session, NOW(), :participants, 'active')
             ");
             
@@ -35,9 +35,9 @@ class SessionMatchModel {
     public function getSession($idSession) {
         try {
             $stmt = $this->db->prepare("
-                SELECT s.*, j.nom as nom_jeu
-                FROM SessionMatch s
-                INNER JOIN jeux j ON s.id_jeu = j.id_jeu
+                SELECT s.*, j.titre AS nom_jeu
+                FROM sessionmatch s
+                INNER JOIN jeu j ON s.id_jeu = j.id_jeu
                 WHERE s.id_session = :id_session
             ");
             $stmt->execute([':id_session' => $idSession]);
@@ -57,9 +57,9 @@ class SessionMatchModel {
     public function getSessionsUtilisateur($idUtilisateur) {
         try {
             $stmt = $this->db->prepare("
-                SELECT s.*, j.nom as nom_jeu
-                FROM SessionMatch s
-                INNER JOIN jeux j ON s.id_jeu = j.id_jeu
+                SELECT s.*, j.titre AS nom_jeu
+                FROM sessionmatch s
+                INNER JOIN jeu j ON s.id_jeu = j.id_jeu
                 WHERE s.statut = 'active'
                 ORDER BY s.date_creation DESC
             ");
@@ -86,9 +86,9 @@ class SessionMatchModel {
     public function getAllSessions($statut = null) {
         try {
             $sql = "
-                SELECT s.*, j.nom as nom_jeu
-                FROM SessionMatch s
-                INNER JOIN jeux j ON s.id_jeu = j.id_jeu
+                SELECT s.*, j.titre AS nom_jeu
+                FROM sessionmatch s
+                INNER JOIN jeu j ON s.id_jeu = j.id_jeu
             ";
             
             if ($statut !== null) {
@@ -120,7 +120,7 @@ class SessionMatchModel {
     public function updateStatut($idSession, $statut) {
         try {
             $stmt = $this->db->prepare("
-                UPDATE SessionMatch 
+                UPDATE sessionmatch 
                 SET statut = :statut 
                 WHERE id_session = :id_session
             ");
@@ -137,7 +137,7 @@ class SessionMatchModel {
     
     public function supprimerSession($idSession) {
         try {
-            $stmt = $this->db->prepare("DELETE FROM SessionMatch WHERE id_session = :id_session");
+            $stmt = $this->db->prepare("DELETE FROM sessionmatch WHERE id_session = :id_session");
             return $stmt->execute([':id_session' => $idSession]);
         } catch (PDOException $e) {
             error_log("Erreur SessionMatchModel::supprimerSession: " . $e->getMessage());
@@ -159,7 +159,7 @@ class SessionMatchModel {
     }
     
     public function genererLienDiscord($idSession) {
-        $configFile = __DIR__ . '/../config/discord.php';
+        $configFile = __DIR__ . '/../../../config/discord.php';
         
         if (file_exists($configFile)) {
             $config = require $configFile;
