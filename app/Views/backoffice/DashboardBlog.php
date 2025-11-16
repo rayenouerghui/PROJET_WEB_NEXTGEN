@@ -161,7 +161,7 @@ if (isset($_GET['success'])) {
     <title>Dashboard Blog - NextGen</title>
 
     <!-- Liens CSS -->
-    <link rel="stylesheet" href="/PROJET_WEB_NEXTGEN/public/css/common.css" />
+    <link rel="stylesheet" href="/PROJET_WEB_NEXTGEN/public/css/style.css" />
     <link rel="stylesheet" href="/PROJET_WEB_NEXTGEN/public/css/frontoffice.css" />
     <link rel="stylesheet" href="/PROJET_WEB_NEXTGEN/public/css/blog.css" />
 
