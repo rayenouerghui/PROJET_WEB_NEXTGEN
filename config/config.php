@@ -1,10 +1,9 @@
+<?php
 /* ============================================
 
    FILE: config/config.php
 
    ============================================ */
-
-<?php
 
 class config
 
@@ -22,7 +21,7 @@ class config
 
                 self::$pdo = new PDO(
 
-                    'mysql:host=localhost;dbname=storedb',
+                    'mysql:host=localhost;dbname=nextgen_db',
 
                     'root',
 
