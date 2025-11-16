@@ -1,10 +1,9 @@
+<?php
 /* ============================================
 
    FILE: config/config.php
 
    ============================================ */
-
-<?php
 
 class config
 
@@ -22,7 +21,7 @@ class config
 
                 self::$pdo = new PDO(
 
-                    'mysql:host=localhost;dbname=storedb',
+                    'mysql:host=localhost;dbname=nextgen_db',
 
                     'root',
 
@@ -38,10 +37,12 @@ class config
 
                 );
 
+            } catch (PDOException $e) {
+                error_log("config::getConnexion - PDO Exception: " . $e->getMessage());
+                throw new Exception('Erreur de connexion à la base de données: ' . $e->getMessage());
             } catch (Exception $e) {
-
-                die('Erreur: ' . $e->getMessage());
-
+                error_log("config::getConnexion - General Exception: " . $e->getMessage());
+                throw $e;
             }
 
         }
