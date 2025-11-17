@@ -1,0 +1,76 @@
+/* Matchmaking-specific styles */
+.matchmaking-page {
+    background: #f5f7fb;
+    min-height: 100vh;
+}
+
+.games-matchmaking-list {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px 80px;
+}
+
+.games-matchmaking-list .page-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.games-matchmaking-list .alert {
+    max-width: 640px;
+    margin: 0 auto 24px;
+}
+
+.session-found {
+    background: #fff;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 15px 45px rgba(15, 23, 42, 0.08);
+    margin-bottom: 32px;
+}
+
+.session-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.session-info-item {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.games-matchmaking-list .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 30px;
+}
+
+.game-card {
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+}
+
+.game-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+}
+
+.game-content {
+    padding: 20px;
+}
+
+.match-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px 0;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #9333ea);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}

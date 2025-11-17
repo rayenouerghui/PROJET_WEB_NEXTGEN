@@ -66,17 +66,17 @@ class SessionMatchModel {
             $stmt->execute();
             
             $sessions = $stmt->fetchAll();
-            $userSessions = [];
+            $sessionsUtilisateur = [];
             
             foreach ($sessions as $session) {
                 $participants = json_decode($session['participants'], true);
                 if (is_array($participants) && in_array($idUtilisateur, $participants)) {
                     $session['participants'] = $participants;
-                    $userSessions[] = $session;
+                    $sessionsUtilisateur[] = $session;
                 }
             }
             
-            return $userSessions;
+            return $sessionsUtilisateur;
         } catch (PDOException $e) {
             error_log("Erreur SessionMatchModel::getSessionsUtilisateur: " . $e->getMessage());
             return [];
@@ -163,8 +163,11 @@ class SessionMatchModel {
         
         if (file_exists($configFile)) {
             $config = require $configFile;
-            if (isset($config['server_invite_code']) && !empty($config['server_invite_code']) && $config['server_invite_code'] !== 'VOTRE_CODE_ICI') {
-                return 'https://discord.gg/' . $config['server_invite_code'];
+            $codeServeur = $config['server_invite_code'];
+            $codeValide = !empty($codeServeur) && $codeServeur !== 'VOTRE_CODE_ICI';
+            
+            if ($codeValide) {
+                return 'https://discord.gg/' . $codeServeur;
             }
         }
         

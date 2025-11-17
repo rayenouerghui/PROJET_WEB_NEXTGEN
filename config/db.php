@@ -12,30 +12,33 @@ class Database {
     
     private function __construct() {
         try {
-            $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset={$this->charset}";
+            $dsn = "mysql:host=$this->host;dbname=$this->dbname;charset=$this->charset";
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_EMULATE_PREPARES => false
             ];
             
             $this->connection = new PDO($dsn, $this->username, $this->password, $options);
         } catch (PDOException $e) {
-            $errorMsg = "Erreur de connexion à la base de données";
-            if (strpos($e->getMessage(), '2002') !== false) {
-                $errorMsg .= ": MySQL n'est pas démarré. Veuillez démarrer MySQL dans XAMPP.";
-            } elseif (strpos($e->getMessage(), '1049') !== false) {
-                $errorMsg .= ": La base de données '{$this->dbname}' n'existe pas. Veuillez l'importer.";
+            $messageErreur = $e->getMessage();
+            $erreurConnexion = "Erreur de connexion à la base de données";
+            
+            if (strpos($messageErreur, '2002') !== false) {
+                $erreurConnexion .= ": MySQL n'est pas démarré";
+            } elseif (strpos($messageErreur, '1049') !== false) {
+                $erreurConnexion .= ": La base de données n'existe pas";
             } else {
-                $errorMsg .= ": " . $e->getMessage();
+                $erreurConnexion .= ": $messageErreur";
             }
-            throw new PDOException($errorMsg);
+            
+            throw new PDOException($erreurConnexion);
         }
     }
     
     public static function getInstance() {
         if (self::$instance === null) {
-            self::$instance = new self();
+            self::$instance = new Database();
         }
         return self::$instance;
     }

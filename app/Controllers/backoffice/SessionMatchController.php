@@ -82,6 +82,7 @@ class SessionMatchController {
             $data = json_decode(file_get_contents('php://input'), true);
             $idSession = isset($data['id_session']) ? (int)$data['id_session'] : 0;
             $statut = isset($data['statut']) ? trim($data['statut']) : '';
+            $statutsValides = ['active', 'terminee', 'annulee'];
             
             if ($idSession === 0) {
                 http_response_code(400);
@@ -92,11 +93,11 @@ class SessionMatchController {
                 return;
             }
             
-            if (!in_array($statut, ['active', 'terminee', 'annulee'])) {
+            if (!in_array($statut, $statutsValides)) {
                 http_response_code(400);
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Statut invalide. Valeurs autorisées: active, terminee, annulee'
+                    'message' => 'Statut invalide'
                 ]);
                 return;
             }
@@ -106,7 +107,7 @@ class SessionMatchController {
             if ($success) {
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Session modifiée avec succès'
+                    'message' => 'Session modifiée'
                 ]);
             } else {
                 http_response_code(500);
@@ -127,5 +128,3 @@ class SessionMatchController {
 }
 
 ?>
-
-

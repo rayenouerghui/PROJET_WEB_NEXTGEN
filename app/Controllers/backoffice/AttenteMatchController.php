@@ -29,8 +29,8 @@ class AttenteMatchController {
             }
             
             $attentes = $this->attenteModel->getAllAttentesActives();
-            
             $attentesParJeu = [];
+            
             foreach ($attentes as $attente) {
                 $idJeu = $attente['id_jeu'];
                 if (!isset($attentesParJeu[$idJeu])) {
@@ -154,5 +154,3 @@ class AttenteMatchController {
 }
 
 ?>
-
-

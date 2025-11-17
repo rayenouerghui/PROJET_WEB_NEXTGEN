@@ -57,7 +57,7 @@ class AttenteMatchModel {
                 LIMIT :limit
             ");
             $stmt->bindValue(':id_jeu', $idJeu, PDO::PARAM_INT);
-            $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
             
             return $stmt->fetchAll();

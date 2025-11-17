@@ -45,7 +45,8 @@ class MatchmakingAdminController extends BaseController {
                 } elseif ($_POST['action'] === 'supprimer_attente') {
                     $idAttente = isset($_POST['id_attente']) ? (int)$_POST['id_attente'] : 0;
                     if ($idAttente > 0) {
-                        if ($this->attenteModel->supprimerAttente($idAttente)) {
+                        $success = $this->attenteModel->supprimerAttente($idAttente);
+                        if ($success) {
                             $message = 'Attente supprimée avec succès';
                             $messageType = 'success';
                         } else {
@@ -56,7 +57,8 @@ class MatchmakingAdminController extends BaseController {
                 } elseif ($_POST['action'] === 'supprimer_session') {
                     $idSession = isset($_POST['id_session']) ? (int)$_POST['id_session'] : 0;
                     if ($idSession > 0) {
-                        if ($this->sessionModel->supprimerSession($idSession)) {
+                        $success = $this->sessionModel->supprimerSession($idSession);
+                        if ($success) {
                             $message = 'Session supprimée avec succès';
                             $messageType = 'success';
                         } else {
@@ -67,8 +69,10 @@ class MatchmakingAdminController extends BaseController {
                 } elseif ($_POST['action'] === 'modifier_session') {
                     $idSession = isset($_POST['id_session']) ? (int)$_POST['id_session'] : 0;
                     $statut = isset($_POST['statut']) ? trim($_POST['statut']) : '';
-                    if ($idSession > 0 && in_array($statut, ['active', 'terminee', 'annulee'])) {
-                        if ($this->sessionModel->updateStatut($idSession, $statut)) {
+                    $statutsValides = ['active', 'terminee', 'annulee'];
+                    if ($idSession > 0 && in_array($statut, $statutsValides)) {
+                        $success = $this->sessionModel->updateStatut($idSession, $statut);
+                        if ($success) {
                             $message = 'Session modifiée avec succès';
                             $messageType = 'success';
                         } else {
@@ -94,23 +98,19 @@ class MatchmakingAdminController extends BaseController {
         } catch (Exception $e) {
             $message = 'Erreur de connexion: ' . $e->getMessage();
             $messageType = 'error';
-            $attentes = [];
-            $sessions = [];
         }
         
         $attentesParJeu = [];
-        if (is_array($attentes)) {
-            foreach ($attentes as $attente) {
-                $idJeu = $attente['id_jeu'];
-                if (!isset($attentesParJeu[$idJeu])) {
-                    $attentesParJeu[$idJeu] = [
-                        'id_jeu' => $idJeu,
-                        'nom_jeu' => isset($attente['nom_jeu']) ? $attente['nom_jeu'] : 'Jeu inconnu',
-                        'attentes' => []
-                    ];
-                }
-                $attentesParJeu[$idJeu]['attentes'][] = $attente;
+        foreach ($attentes as $attente) {
+            $idJeu = $attente['id_jeu'];
+            if (!isset($attentesParJeu[$idJeu])) {
+                $attentesParJeu[$idJeu] = [
+                    'id_jeu' => $idJeu,
+                    'nom_jeu' => $attente['nom_jeu'],
+                    'attentes' => []
+                ];
             }
+            $attentesParJeu[$idJeu]['attentes'][] = $attente;
         }
         
         $data = [
@@ -126,4 +126,3 @@ class MatchmakingAdminController extends BaseController {
 }
 
 ?>
-

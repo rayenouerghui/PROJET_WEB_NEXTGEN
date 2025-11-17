@@ -10,54 +10,7 @@ if (file_exists($configFile)) {
     }
 }
 ?>
-
-<style>
-.error-message {
-    color: #ef4444;
-    font-size: 14px;
-    margin-top: 5px;
-    display: none;
-}
-.matchmaking-dashboard {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-.dashboard-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-left: 4px solid #2563eb;
-}
-.dashboard-card h3 {
-    font-size: 14px;
-    color: #6b7280;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-.dashboard-card .value {
-    font-size: 32px;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 5px;
-}
-.dashboard-card .label {
-    font-size: 12px;
-    color: #9ca3af;
-}
-.dashboard-card.waiting {
-    border-left-color: #f59e0b;
-}
-.dashboard-card.active {
-    border-left-color: #10b981;
-}
-.dashboard-card.total {
-    border-left-color: #2563eb;
-}
-</style>
+<link rel="stylesheet" href="/PROJET_WEB_NEXTGEN-main/public/css/matchmaking_admin.css">
 
 <div class="attentes-container">
     <div class="page-header">
@@ -95,11 +48,11 @@ if (file_exists($configFile)) {
     </div>
 
     <div class="section">
-        <h2 class="section-title">📋 Files d'Attente</h2>
+        <h2 class="section-title">Files d'attente</h2>
         
         <?php if (!isset($attentesParJeu) || empty($attentesParJeu)): ?>
             <div class="empty-state">
-                <div class="empty-state-icon">📭</div>
+                <div class="empty-state-icon"></div>
                 <h3 class="empty-state-title">Aucune attente active</h3>
                 <p class="empty-state-text">Aucun utilisateur n'est actuellement en attente de match.</p>
             </div>
@@ -141,7 +94,7 @@ if (file_exists($configFile)) {
                         <form method="POST" style="margin-top: 16px;">
                             <input type="hidden" name="action" value="verifier_matchs">
                             <input type="hidden" name="id_jeu" value="<?php echo $groupe['id_jeu']; ?>">
-                            <button type="submit" class="btn btn-success">🔍 Vérifier les matchs pour ce jeu</button>
+                            <button type="submit" class="btn btn-success">Vérifier les matchs pour ce jeu</button>
                         </form>
                     </div>
                 </div>
@@ -150,11 +103,11 @@ if (file_exists($configFile)) {
     </div>
 
     <div class="section">
-        <h2 class="section-title">🎮 Sessions Actives</h2>
+        <h2 class="section-title">Sessions actives</h2>
         
         <?php if (!isset($sessions) || empty($sessions)): ?>
             <div class="empty-state">
-                <div class="empty-state-icon">🎯</div>
+                <div class="empty-state-icon"></div>
                 <h3 class="empty-state-title">Aucune session active</h3>
                 <p class="empty-state-text">Aucune session de match n'est actuellement active.</p>
             </div>
@@ -215,7 +168,7 @@ if (file_exists($configFile)) {
     </div>
 
     <div class="section">
-        <h2 class="section-title">🧹 Maintenance</h2>
+        <h2 class="section-title">Maintenance</h2>
         <form method="POST" data-validate>
             <input type="hidden" name="action" value="nettoyer_attentes">
             <div class="form-group">
