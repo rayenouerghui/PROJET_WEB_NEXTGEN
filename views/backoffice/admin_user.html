@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>NextGen - Gestion Utilisateurs</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f8fafc;
+            color: #334155;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background: #1e293b;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+        }
+        .sidebar h2 {
+            margin-bottom: 30px;
+            color: #60a5fa;
+        }
+        .sidebar nav a {
+            display: block;
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background: #374151;
+            color: white;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
+        }
+        .admin-header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .badge.success { background: #dcfce7; color: #166534; }
+        .badge.warning { background: #fef3c7; color: #92400e; }
+        .badge.danger { background: #fee2e2; color: #dc2626; }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 2px;
+        }
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            padding: 10px 20px;
+        }
+        .btn-edit { background: #dbeafe; color: #1e40af; }
+        .btn-delete { background: #fee2e2; color: #dc2626; }
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .search-bar input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            flex: 1;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.8em;
+            margin-top: 5px;
+            display: none;
+        }
+        .input-error {
+            border: 2px solid #ff6b6b !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🔧 Administration</h2>
+        <nav>
+            <a href="admin_dashboard.html">📊 Dashboard</a>
+            <a href="admin_users.html" class="active">👥 Utilisateurs</a>
+            <a href="#">🎮 Jeux</a>
+            <a href="#">📦 Commandes</a>
+            <a href="#">💝 Dons</a>
+            <a href="../../index.html">🚪 Déconnexion</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="admin-header">
+            <h1>Gestion des Utilisateurs</h1>
+            <button class="btn-primary" onclick="openModal()">+ Ajouter un utilisateur</button>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchUsers" placeholder="Rechercher un utilisateur...">
+            <button class="btn-primary">🔍 Rechercher</button>
+        </div>
+
+        <div class="table-container">
+            <h3>Liste des Utilisateurs</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom complet</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Statut</th>
+                        <th>Date inscription</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#001</td>
+                        <td>John Doe</td>
+                        <td>john.doe@email.com</td>
+                        <td><span class="badge success">Utilisateur</span></td>
+                        <td><span class="badge success">Actif</span></td>
+                        <td>12/11/2024</td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editUser(1)">✏️ Modifier</button>
+                            <button class="btn btn-delete" onclick="confirmDelete(1, 'John Doe')">🗑️ Supprimer</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>#002</td>
+                        <td>Jane Smith</td>
+                        <td>jane.smith@email.com</td>
+                        <td><span class="badge warning">Admin</span></td>
+                        <td><span class="badge success">Actif</span></td>
+                        <td>11/11/2024</td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editUser(2)">✏️ Modifier</button>
+                            <button class="btn btn-delete" onclick="confirmDelete(2, 'Jane Smith')">🗑️ Supprimer</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal d'ajout/modification -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Ajouter un utilisateur</h3>
+            <form id="userForm">
+                <div style="margin-bottom: 15px;">
+                    <label>Prénom :</label>
+                    <input type="text" id="modalPrenom" style="width: 100%; padding: 8px;">
+                    <div class="error-message" id="modalPrenomError">Le prénom est obligatoire</div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Nom :</label>
+                    <input type="text" id="modalNom" style="width: 100%; padding: 8px;">
+                    <div class="error-message" id="modalNomError">Le nom est obligatoire</div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Email :</label>
+                    <input type="text" id="modalEmail" style="width: 100%; padding: 8px;">
+                    <div class="error-message" id="modalEmailError">Email invalide</div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Rôle :</label>
+                    <select id="modalRole" style="width: 100%; padding: 8px;">
+                        <option value="user">Utilisateur</option>
+                        <option value="admin">Administrateur</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" onclick="closeModal()" style="padding: 8px 15px;">Annuler</button>
+                    <button type="submit" style="padding: 8px 15px; background: #2563eb; color: white; border: none;">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Contrôles de saisie pour le modal
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const prenom = document.getElementById('modalPrenom').value.trim();
+            const nom = document.getElementById('modalNom').value.trim();
+            const email = document.getElementById('modalEmail').value.trim();
+            let isValid = true;
+
+            resetModalErrors();
+
+            if (!prenom) {
+                showModalError('modalPrenomError', 'modalPrenom', 'Le prénom est obligatoire');
+                isValid = false;
+            }
+
+            if (!nom) {
+                showModalError('modalNomError', 'modalNom', 'Le nom est obligatoire');
+                isValid = false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+                showModalError('modalEmailError', 'modalEmail', 'L\'email est obligatoire');
+                isValid = false;
+            } else if (!emailRegex.test(email)) {
+                showModalError('modalEmailError', 'modalEmail', 'Format email invalide');
+                isValid = false;
+            }
+
+            if (isValid) {
+                alert('Utilisateur enregistré avec succès !');
+                closeModal();
+            }
+        });
+
+        function confirmDelete(userId, userName) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${userName}" ?`)) {
+                alert(`Utilisateur ${userName} supprimé !`);
+            }
+        }
+
+        function showModalError(errorId, inputId, message) {
+            document.getElementById(errorId).textContent = message;
+            document.getElementById(errorId).style.display = 'block';
+            document.getElementById(inputId).classList.add('input-error');
+        }
+
+        function resetModalErrors() {
+            const errors = document.querySelectorAll('#userModal .error-message');
+            errors.forEach(error => error.style.display = 'none');
+            
+            const inputs = document.querySelectorAll('#userModal input');
+            inputs.forEach(input => input.classList.remove('input-error'));
+        }
+
+        function openModal() {
+            document.getElementById('userModal').style.display = 'block';
+            resetModalErrors();
+            document.getElementById('userForm').reset();
+        }
+
+        function closeModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        function editUser(userId) {
+            openModal();
+            document.getElementById('modalTitle').textContent = 'Modifier l\'utilisateur';
+            document.getElementById('modalPrenom').value = 'John';
+            document.getElementById('modalNom').value = 'Doe';
+            document.getElementById('modalEmail').value = 'john.doe@email.com';
+        }
+
+        // Contrôle de recherche
+        document.getElementById('searchUsers').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

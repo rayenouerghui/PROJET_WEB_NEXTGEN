@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>NextGen - Accueil</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #2563eb 0%, #ea580c 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: rgba(255,255,255,0.1);
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 5px;
+        }
+        .hero {
+            text-align: center;
+            padding: 100px 20px;
+        }
+        .hero h1 { font-size: 3rem; margin-bottom: 20px; }
+        .hero p { font-size: 1.2rem; margin-bottom: 30px; }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: white;
+            color: #2563eb;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2>NextGen</h2>
+        </div>
+        <div class="nav-links">
+            <a href="views/frontoffice/login.html">Se connecter</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Bienvenue sur NextGen</h1>
+        <p>Jouer pour Espérer - Chaque achat soutient les orphelins</p>
+        <a href="views/frontoffice/login.html" class="btn">Commencer maintenant</a>
+        <br>
+        <a href="views/frontoffice/register.html" class="btn" style="background: transparent; color: white; border: 2px solid white;">Créer un compte</a>
+    </div>
+</body>
+</html>

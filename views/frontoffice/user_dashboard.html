@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>NextGen - Tableau de Bord</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f5f5f5;
+            color: #333;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: #2563eb;
+            color: white;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 5px;
+        }
+        .user-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin: 10px 0;
+        }
+        .games-section, .donations-section {
+            background: white;
+            margin: 20px;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #2563eb;
+            color: white;
+        }
+        .impact-box {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2>NextGen</h2>
+        </div>
+        <div class="nav-links">
+            <a href="user_dashboard.html">Accueil</a>
+            <a href="user_profile.html">Mon Profil</a>
+            <a href="../../index.html">Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="user-header">
+        <h1>Bienvenue John Doe !</h1>
+        <p>Votre espace personnel NextGen</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>🎮 Jeux achetés</h3>
+            <div class="stat-number">8</div>
+            <p>Dernier achat : Aujourd'hui</p>
+        </div>
+        <div class="stat-card">
+            <h3>💝 Total donné</h3>
+            <div class="stat-number">45,50€</div>
+            <p>Merci pour votre générosité</p>
+        </div>
+        <div class="stat-card">
+            <h3>⭐ Mon niveau</h3>
+            <div class="stat-number">Expert</div>
+            <p>Joueur actif</p>
+        </div>
+    </div>
+
+    <section class="games-section">
+        <h2>🎯 Mes jeux récents</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Jeu</th>
+                    <th>Date d'achat</th>
+                    <th>Prix</th>
+                    <th>Don généré</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Cyber Adventure</strong></td>
+                    <td>12/11/2024</td>
+                    <td>29,99€</td>
+                    <td>5,00€</td>
+                </tr>
+                <tr>
+                    <td><strong>Space Quest</strong></td>
+                    <td>10/11/2024</td>
+                    <td>19,99€</td>
+                    <td>3,50€</td>
+                </tr>
+                <tr>
+                    <td><strong>Jungle Runner</strong></td>
+                    <td>05/11/2024</td>
+                    <td>14,99€</td>
+                    <td>2,50€</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="donations-section">
+        <h2>❤️ Mon impact solidaire</h2>
+        
+        <div class="impact-box">
+            <h3>💰 Total des dons générés : <strong>45,50€</strong></h3>
+            <p>📊 Votre contribution équivaut à :</p>
+            <ul>
+                <li>✅ <strong>9 repas complets</strong> pour les enfants</li>
+                <li>✅ <strong>4 kits scolaires</strong> pour l'éducation</li>
+                <li>✅ <strong>2 semaines</strong> d'activités récréatives</li>
+            </ul>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Jeu associé</th>
+                    <th>Montant du don</th>
+                    <th>Bénéficiaire</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>12/11/2024</td>
+                    <td>Cyber Adventure</td>
+                    <td>5,00€</td>
+                    <td>Maison des Orphelins</td>
+                </tr>
+                <tr>
+                    <td>10/11/2024</td>
+                    <td>Space Quest</td>
+                    <td>3,50€</td>
+                    <td>Maison des Orphelins</td>
+                </tr>
+                <tr>
+                    <td>05/11/2024</td>
+                    <td>Jungle Runner</td>
+                    <td>2,50€</td>
+                    <td>Maison des Orphelins</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>NextGen - Mon Profil</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f5f5f5;
+            color: #333;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: #2563eb;
+            color: white;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 5px;
+        }
+        .profile-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .profile-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .avatar-section {
+            text-align: center;
+        }
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn {
+            padding: 12px 25px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.8em;
+            margin-top: 5px;
+            display: none;
+        }
+        .input-error {
+            border: 2px solid #ff6b6b !important;
+        }
+        .success-message {
+            color: #51cf66;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2>NextGen</h2>
+        </div>
+        <div class="nav-links">
+            <a href="user_dashboard.html">Accueil</a>
+            <a href="user_profile.html">Mon Profil</a>
+            <a href="../../index.html">Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <div class="profile-section avatar-section">
+            <div class="avatar">JD</div>
+            <h2>John Doe</h2>
+            <p>Membre depuis : 12 Novembre 2024</p>
+            <button class="btn" style="background: #666;">Changer la photo</button>
+        </div>
+
+        <div class="profile-section">
+            <h3>📝 Informations personnelles</h3>
+            <form id="profileForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="profile_prenom">Prénom :</label>
+                        <input type="text" id="profile_prenom" name="prenom" value="John">
+                        <div class="error-message" id="prenomError">Le prénom est obligatoire</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile_nom">Nom :</label>
+                        <input type="text" id="profile_nom" name="nom" value="Doe">
+                        <div class="error-message" id="nomError">Le nom est obligatoire</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="profile_email">Email :</label>
+                    <input type="text" id="profile_email" name="email" value="john.doe@email.com">
+                    <div class="error-message" id="emailError">Email invalide</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="profile_telephone">Téléphone :</label>
+                    <input type="tel" id="profile_telephone" name="telephone" value="+216 12 345 678">
+                    <div class="error-message" id="phoneError">Format téléphone invalide</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="profile_date_naissance">Date de naissance :</label>
+                        <input type="date" id="profile_date_naissance" name="date_naissance" value="1990-01-01">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile_pays">Pays :</label>
+                        <select id="profile_pays" name="pays">
+                            <option value="tn">Tunisie</option>
+                            <option value="fr" selected>France</option>
+                            <option value="ca">Canada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="success-message" id="successMessage">
+                    ✅ Profil mis à jour avec succès !
+                </div>
+
+                <button type="submit" class="btn">💾 Enregistrer les modifications</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const prenom = document.getElementById('profile_prenom').value.trim();
+            const nom = document.getElementById('profile_nom').value.trim();
+            const email = document.getElementById('profile_email').value.trim();
+            const telephone = document.getElementById('profile_telephone').value.trim();
+            let isValid = true;
+
+            resetErrors();
+
+            if (!prenom) {
+                showError('prenomError', 'profile_prenom', 'Le prénom est obligatoire');
+                isValid = false;
+            }
+
+            if (!nom) {
+                showError('nomError', 'profile_nom', 'Le nom est obligatoire');
+                isValid = false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+                showError('emailError', 'profile_email', 'L\'email est obligatoire');
+                isValid = false;
+            } else if (!emailRegex.test(email)) {
+                showError('emailError', 'profile_email', 'Format email invalide');
+                isValid = false;
+            }
+
+            const phoneRegex = /^[\+]?[0-9\s\-\(\)]{8,}$/;
+            if (telephone && !phoneRegex.test(telephone.replace(/\s/g, ''))) {
+                showError('phoneError', 'profile_telephone', 'Format téléphone invalide');
+                isValid = false;
+            }
+
+            if (isValid) {
+                document.getElementById('successMessage').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 3000);
+            }
+        });
+
+        function showError(errorId, inputId, message) {
+            document.getElementById(errorId).textContent = message;
+            document.getElementById(errorId).style.display = 'block';
+            document.getElementById(inputId).classList.add('input-error');
+        }
+
+        function resetErrors() {
+            const errors = document.querySelectorAll('.error-message');
+            errors.forEach(error => error.style.display = 'none');
+            
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => input.classList.remove('input-error'));
+        }
+
+        document.getElementById('profile_email').addEventListener('input', function() {
+            const email = this.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                showError('emailError', 'profile_email', 'Format email invalide');
+            } else {
+                document.getElementById('emailError').style.display = 'none';
+                this.classList.remove('input-error');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>NextGen - Inscription</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #2563eb 0%, #ea580c 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .register-container {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(10px);
+        }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 5px; 
+            margin-top: 5px;
+        }
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px;
+        }
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.8em;
+            margin-top: 5px;
+            display: none;
+        }
+        .input-error {
+            border: 2px solid #ff6b6b !important;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .success-message {
+            color: #51cf66;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2 style="text-align: center; margin-bottom: 30px;">Inscription</h2>
+        
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="prenom">Prénom :</label>
+                    <input type="text" id="prenom" name="prenom" placeholder="Votre prénom">
+                    <div class="error-message" id="prenomError">Le prénom est obligatoire (min. 2 caractères)</div>
+                </div>
+                <div class="form-group">
+                    <label for="nom">Nom :</label>
+                    <input type="text" id="nom" name="nom" placeholder="Votre nom">
+                    <div class="error-message" id="nomError">Le nom est obligatoire (min. 2 caractères)</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email :</label>
+                <input type="text" id="email" name="email" placeholder="votre@email.com">
+                <div class="error-message" id="emailError">Veuillez entrer un email valide</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Mot de passe :</label>
+                <input type="password" id="password" name="password" placeholder="Minimum 6 caractères">
+                <div class="error-message" id="passwordError">Le mot de passe doit contenir au moins 6 caractères</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirmer le mot de passe :</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Retapez votre mot de passe">
+                <div class="error-message" id="confirmPasswordError">Les mots de passe ne correspondent pas</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="user_type">Type de compte :</label>
+                <select id="user_type" name="user_type">
+                    <option value="user">Utilisateur</option>
+                    <option value="admin">Administrateur</option>
+                </select>
+            </div>
+            
+            <div class="success-message" id="successMessage">
+                ✅ Inscription réussie ! Redirection...
+            </div>
+            
+            <button type="submit" class="btn">S'inscrire</button>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="login.html" style="color: white;">Déjà un compte ? Se connecter</a>
+                <br>
+                <a href="../../index.html" style="color: white; margin-top: 10px; display: block;">← Retour à l'accueil</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const prenom = document.getElementById('prenom').value.trim();
+            const nom = document.getElementById('nom').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            let isValid = true;
+
+            resetErrors();
+
+            if (!prenom) {
+                showError('prenomError', 'prenom', 'Le prénom est obligatoire');
+                isValid = false;
+            } else if (prenom.length < 2) {
+                showError('prenomError', 'prenom', 'Le prénom doit contenir au moins 2 caractères');
+                isValid = false;
+            }
+
+            if (!nom) {
+                showError('nomError', 'nom', 'Le nom est obligatoire');
+                isValid = false;
+            } else if (nom.length < 2) {
+                showError('nomError', 'nom', 'Le nom doit contenir au moins 2 caractères');
+                isValid = false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+                showError('emailError', 'email', 'L\'email est obligatoire');
+                isValid = false;
+            } else if (!emailRegex.test(email)) {
+                showError('emailError', 'email', 'Format email invalide');
+                isValid = false;
+            }
+
+            if (!password) {
+                showError('passwordError', 'password', 'Le mot de passe est obligatoire');
+                isValid = false;
+            } else if (password.length < 6) {
+                showError('passwordError', 'password', 'Le mot de passe doit contenir au moins 6 caractères');
+                isValid = false;
+            }
+
+            if (!confirmPassword) {
+                showError('confirmPasswordError', 'confirm_password', 'Veuillez confirmer votre mot de passe');
+                isValid = false;
+            } else if (password !== confirmPassword) {
+                showError('confirmPasswordError', 'confirm_password', 'Les mots de passe ne correspondent pas');
+                isValid = false;
+            }
+
+            if (isValid) {
+                document.getElementById('successMessage').style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
+        });
+
+        function showError(errorId, inputId, message) {
+            document.getElementById(errorId).textContent = message;
+            document.getElementById(errorId).style.display = 'block';
+            document.getElementById(inputId).classList.add('input-error');
+        }
+
+        function resetErrors() {
+            const errors = document.querySelectorAll('.error-message');
+            errors.forEach(error => error.style.display = 'none');
+            
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => input.classList.remove('input-error'));
+        }
+
+        document.getElementById('prenom').addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value && value.length < 2) {
+                showError('prenomError', 'prenom', 'Le prénom doit contenir au moins 2 caractères');
+            } else {
+                document.getElementById('prenomError').style.display = 'none';
+                this.classList.remove('input-error');
+            }
+        });
+
+        document.getElementById('nom').addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value && value.length < 2) {
+                showError('nomError', 'nom', 'Le nom doit contenir au moins 2 caractères');
+            } else {
+                document.getElementById('nomError').style.display = 'none';
+                this.classList.remove('input-error');
+            }
+        });
+
+        document.getElementById('email').addEventListener('input', function() {
+            const email = this.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                showError('emailError', 'email', 'Format email invalide');
+            } else {
+                document.getElementById('emailError').style.display = 'none';
+                this.classList.remove('input-error');
+            }
+        });
+
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                showError('confirmPasswordError', 'confirm_password', 'Les mots de passe ne correspondent pas');
+            } else {
+                document.getElementById('confirmPasswordError').style.display = 'none';
+                this.classList.remove('input-error');
+            }
+        });
+    </script>
+</body>
+</html>
