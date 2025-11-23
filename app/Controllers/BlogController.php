@@ -15,10 +15,12 @@ class BlogController {
         }
     }
 
-    // Afficher tous les articles
+    /**
+     * Afficher tous les articles (pour la page blog)
+     */
     public function index() {
         try {
-            $articles = $this->blogModel->getAllArticles();
+            $articles = $this->getAllArticles();
 
             // Transformer les données pour le frontend
             $formattedArticles = [];
@@ -42,10 +44,12 @@ class BlogController {
         }
     }
 
-    // Afficher un article spécifique
+    /**
+     * Afficher un article spécifique
+     */
     public function show($id_article) {
         try {
-            $article = $this->blogModel->getArticleById($id_article);
+            $article = $this->getArticleById($id_article);
 
             if (!$article) {
                 return ['error' => 'Article non trouvé'];
@@ -69,7 +73,9 @@ class BlogController {
         }
     }
 
-    // Créer un nouvel article avec upload d'image
+    /**
+     * Créer un nouvel article avec upload d'image
+     */
     public function create($data, $files = null) {
         try {
             // Validation des données
@@ -99,7 +105,7 @@ class BlogController {
                 'id_auteur' => $data['id_auteur'] ?? 1
             ];
 
-            $result = $this->blogModel->createArticle($articleData);
+            $result = $this->createArticleDB($articleData);
 
             if ($result) {
                 return ['success' => true, 'message' => 'Article créé avec succès'];
@@ -116,11 +122,13 @@ class BlogController {
         }
     }
 
-    // Mettre à jour un article avec upload d'image
+    /**
+     * Mettre à jour un article avec upload d'image
+     */
     public function update($id_article, $data, $files = null) {
         try {
             // Vérifier si l'article existe
-            $existingArticle = $this->blogModel->getArticleById($id_article);
+            $existingArticle = $this->getArticleById($id_article);
             if (!$existingArticle) {
                 return ['success' => false, 'message' => 'Article non trouvé'];
             }
@@ -156,7 +164,7 @@ class BlogController {
                 'id_auteur' => $data['id_auteur'] ?? $existingArticle['id_auteur']
             ];
 
-            $result = $this->blogModel->updateArticle($id_article, $articleData);
+            $result = $this->updateArticleDB($id_article, $articleData);
 
             if ($result) {
                 return ['success' => true, 'message' => 'Article mis à jour avec succès'];
@@ -169,13 +177,22 @@ class BlogController {
         }
     }
 
-    // Supprimer un article et son image
+    /**
+     * Supprimer un article, ses commentaires et son image
+     */
     public function delete($id_article) {
         try {
             // Vérifier si l'article existe
-            $existingArticle = $this->blogModel->getArticleById($id_article);
+            $existingArticle = $this->getArticleById($id_article);
             if (!$existingArticle) {
                 return ['success' => false, 'message' => 'Article non trouvé'];
+            }
+
+            // Supprimer les commentaires associés d'abord
+            $commentsDeleted = $this->deleteCommentsByArticle($id_article);
+
+            if (!$commentsDeleted) {
+                error_log("Avertissement: Impossible de supprimer les commentaires de l'article ID: " . $id_article);
             }
 
             // Supprimer l'image associée
@@ -183,10 +200,10 @@ class BlogController {
                 unlink($this->uploadDir . basename($existingArticle['image']));
             }
 
-            $result = $this->blogModel->deleteArticle($id_article);
+            $result = $this->deleteArticleDB($id_article);
 
             if ($result) {
-                return ['success' => true, 'message' => 'Article supprimé avec succès'];
+                return ['success' => true, 'message' => 'Article et ses commentaires supprimés avec succès'];
             } else {
                 return ['success' => false, 'message' => 'Erreur lors de la suppression de l\'article'];
             }
@@ -196,7 +213,236 @@ class BlogController {
         }
     }
 
-    // Méthode pour gérer l'upload d'image
+    /**
+     * Récupérer les articles par catégorie
+     */
+    public function getByCategory($categorie) {
+        try {
+            $articles = $this->getArticlesByCategory($categorie);
+
+            $formattedArticles = [];
+            foreach ($articles as $article) {
+                $formattedArticles[] = [
+                    'id_article' => $article['id_article'],
+                    'titre' => htmlspecialchars($article['titre']),
+                    'content' => $this->truncateContent($article['content'], 150),
+                    'full_content' => $article['content'],
+                    'date_publication' => $this->formatDate($article['date_publication']),
+                    'categorie' => htmlspecialchars($article['categorie']),
+                    'image' => $article['image'] ?: $this->getDefaultImage($article['categorie']),
+                    'id_auteur' => $article['id_auteur']
+                ];
+            }
+
+            return $formattedArticles;
+        } catch (Exception $e) {
+            error_log("Erreur dans BlogController::getByCategory: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Récupérer les articles récents
+     */
+    public function getRecent($limit = 3) {
+        try {
+            $articles = $this->getRecentArticles($limit);
+
+            $formattedArticles = [];
+            foreach ($articles as $article) {
+                $formattedArticles[] = [
+                    'id_article' => $article['id_article'],
+                    'titre' => htmlspecialchars($article['titre']),
+                    'content' => $this->truncateContent($article['content'], 150),
+                    'full_content' => $article['content'],
+                    'date_publication' => $this->formatDate($article['date_publication']),
+                    'categorie' => htmlspecialchars($article['categorie']),
+                    'image' => $article['image'] ?: $this->getDefaultImage($article['categorie']),
+                    'id_auteur' => $article['id_auteur']
+                ];
+            }
+
+            return $formattedArticles;
+        } catch (Exception $e) {
+            error_log("Erreur dans BlogController::getRecent: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // ===== REQUÊTES SQL (DÉPLACÉES DU MODEL) =====
+
+    /**
+     * Récupérer tous les articles
+     */
+    private function getAllArticles() {
+        try {
+            $pdo = $this->blogModel->getPDO();
+            $table = $this->blogModel->getTableName();
+            $query = "SELECT * FROM {$table} ORDER BY date_publication DESC";
+            $stmt = $pdo->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des articles: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Récupérer un article par son ID
+     */
+    private function getArticleById($id_article) {
+        try {
+            $pdo = $this->blogModel->getPDO();
+            $table = $this->blogModel->getTableName();
+            $query = "SELECT * FROM {$table} WHERE id_article = :id";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':id', $id_article, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération de l'article: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Créer un nouvel article
+     */
+    private function createArticleDB($data) {
+        try {
+            $pdo = $this->blogModel->getPDO();
+            $table = $this->blogModel->getTableName();
+
+            $query = "INSERT INTO {$table} (titre, content, date_publication, categorie, image, id_auteur) 
+                     VALUES (:titre, :content, :date_publication, :categorie, :image, :id_auteur)";
+
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':titre', $data['titre']);
+            $stmt->bindParam(':content', $data['content']);
+            $stmt->bindParam(':date_publication', $data['date_publication']);
+            $stmt->bindParam(':categorie', $data['categorie']);
+            $stmt->bindParam(':image', $data['image']);
+            $stmt->bindParam(':id_auteur', $data['id_auteur'], PDO::PARAM_INT);
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la création de l'article: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Mettre à jour un article
+     */
+    private function updateArticleDB($id_article, $data) {
+        try {
+            $pdo = $this->blogModel->getPDO();
+            $table = $this->blogModel->getTableName();
+
+            $query = "UPDATE {$table} SET 
+                     titre = :titre, 
+                     content = :content, 
+                     date_publication = :date_publication, 
+                     categorie = :categorie, 
+                     image = :image, 
+                     id_auteur = :id_auteur 
+                     WHERE id_article = :id";
+
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':id', $id_article, PDO::PARAM_INT);
+            $stmt->bindParam(':titre', $data['titre']);
+            $stmt->bindParam(':content', $data['content']);
+            $stmt->bindParam(':date_publication', $data['date_publication']);
+            $stmt->bindParam(':categorie', $data['categorie']);
+            $stmt->bindParam(':image', $data['image']);
+            $stmt->bindParam(':id_auteur', $data['id_auteur'], PDO::PARAM_INT);
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la mise à jour de l'article: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Supprimer un article
+     */
+    private function deleteArticleDB($id_article) {
+        try {
+            $pdo = $this->blogModel->getPDO();
+            $table = $this->blogModel->getTableName();
+
+            $query = "DELETE FROM {$table} WHERE id_article = :id";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':id', $id_article, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la suppression de l'article: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Supprimer tous les commentaires d'un article
+     */
+    private function deleteCommentsByArticle($id_article) {
+        try {
+            $pdo = $this->blogModel->getPDO();
+            $query = "DELETE FROM commentaire WHERE id_article = :id_article";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':id_article', $id_article, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la suppression des commentaires: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Récupérer les articles par catégorie
+     */
+    private function getArticlesByCategory($categorie) {
+        try {
+            $pdo = $this->blogModel->getPDO();
+            $table = $this->blogModel->getTableName();
+
+            $query = "SELECT * FROM {$table} WHERE categorie = :categorie ORDER BY date_publication DESC";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':categorie', $categorie);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des articles par catégorie: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Récupérer les derniers articles (pour la page d'accueil)
+     */
+    private function getRecentArticles($limit = 3) {
+        try {
+            $pdo = $this->blogModel->getPDO();
+            $table = $this->blogModel->getTableName();
+
+            $query = "SELECT * FROM {$table} ORDER BY date_publication DESC LIMIT :limit";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des articles récents: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // ===== MÉTHODES PRIVÉES =====
+
+    /**
+     * Gérer l'upload d'image
+     */
     private function uploadImage($file) {
         // Vérifier les erreurs d'upload
         if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -235,7 +481,9 @@ class BlogController {
         }
     }
 
-    // Méthodes utilitaires
+    /**
+     * Valider les données d'un article
+     */
     private function validateArticleData($data) {
         $errors = [];
 
@@ -254,6 +502,9 @@ class BlogController {
         return $errors;
     }
 
+    /**
+     * Tronquer le contenu (pour l'aperçu)
+     */
     private function truncateContent($content, $length) {
         if (strlen($content) <= $length) {
             return $content;
@@ -269,11 +520,17 @@ class BlogController {
         return $truncated . '...';
     }
 
+    /**
+     * Formater la date
+     */
     private function formatDate($date) {
         $timestamp = strtotime($date);
         return date('d/m/Y à H:i', $timestamp);
     }
 
+    /**
+     * Obtenir l'image par défaut selon la catégorie
+     */
     private function getDefaultImage($categorie) {
         $images = [
             'Gaming' => 'https://via.placeholder.com/600x350/6B5BFF/ffffff?text=Gaming',

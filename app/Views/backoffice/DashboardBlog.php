@@ -1,5 +1,6 @@
 <?php
-// Chemin corrigé - remonter de 3 niveaux pour atteindre app/Controllers/
+
+
 require_once __DIR__ . '/../../../app/Controllers/BlogController.php';
 
 // Initialiser le contrôleur
@@ -13,12 +14,13 @@ $action = $_POST['action'] ?? '';
 $message = '';
 $errors = [];
 
+// ===== CRÉATION D'ARTICLE =====
 if ($action === 'create_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validation des champs
     $titre = trim($_POST['titre'] ?? '');
     $content = trim($_POST['content'] ?? '');
     $categorie = trim($_POST['categorie'] ?? '');
 
+    // Validation
     if (empty($titre)) {
         $errors['titre'] = 'Le titre est obligatoire';
     } elseif (strlen($titre) < 3) {
@@ -58,24 +60,22 @@ if ($action === 'create_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $result = $blogController->create($_POST, $_FILES);
         if ($result['success']) {
-            // Redirection pour éviter la resoumission du formulaire
             header('Location: ' . $_SERVER['PHP_SELF'] . '?success=create');
             exit();
         } else {
-            $message = '<div class="alert alert-danger">' . $result['message'] . '</div>';
+            $message = '<div class="alert alert-danger">' . htmlspecialchars($result['message']) . '</div>';
         }
     }
 }
 
-// Traitement de la modification
+// ===== MODIFICATION D'ARTICLE =====
 if ($action === 'update_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $articleId = (int)$_POST['id_article'];
-
-    // Validation des champs
     $titre = trim($_POST['titre'] ?? '');
     $content = trim($_POST['content'] ?? '');
     $categorie = trim($_POST['categorie'] ?? '');
 
+    // Validation
     if (empty($titre)) {
         $errors['titre'] = 'Le titre est obligatoire';
     } elseif (strlen($titre) < 3) {
@@ -115,39 +115,41 @@ if ($action === 'update_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $result = $blogController->update($articleId, $_POST, $_FILES);
         if ($result['success']) {
-            // Redirection pour éviter la resoumission du formulaire
             header('Location: ' . $_SERVER['PHP_SELF'] . '?success=update');
             exit();
         } else {
-            $message = '<div class="alert alert-danger">' . $result['message'] . '</div>';
+            $message = '<div class="alert alert-danger">' . htmlspecialchars($result['message']) . '</div>';
         }
     }
 }
 
-// Traitement de la suppression
+// ===== SUPPRESSION D'ARTICLE =====
 if (isset($_POST['delete_article'])) {
     $articleId = (int)$_POST['delete_article'];
     $result = $blogController->delete($articleId);
     if ($result['success']) {
-        // Redirection pour éviter la resoumission du formulaire
         header('Location: ' . $_SERVER['PHP_SELF'] . '?success=delete');
-        exit();
+        exit;
     } else {
-        $message = '<div class="alert alert-danger">' . $result['message'] . '</div>';
+        $message = '<div class="alert alert-danger">' . htmlspecialchars($result['message']) . '</div>';
     }
 }
 
-// Afficher les messages de succès après redirection
+// ===== MESSAGES DE SUCCÈS =====
 if (isset($_GET['success'])) {
     switch ($_GET['success']) {
         case 'create':
             $message = '<div class="alert alert-success">Article créé avec succès !</div>';
+            // Recharger les articles
+            $articles = $blogController->index();
             break;
         case 'update':
             $message = '<div class="alert alert-success">Article mis à jour avec succès !</div>';
+            $articles = $blogController->index();
             break;
         case 'delete':
-            $message = '<div class="alert alert-success">Article supprimé avec succès !</div>';
+            $message = '<div class="alert alert-success">Article et ses commentaires supprimés avec succès !</div>';
+            $articles = $blogController->index();
             break;
     }
 }
@@ -205,18 +207,6 @@ if (isset($_GET['success'])) {
 
     <?php echo $message; ?>
 
-    <!-- Afficher les erreurs de validation -->
-    <?php if (!empty($errors)): ?>
-        <div class="alert alert-danger">
-            <strong>Erreurs de validation :</strong>
-            <ul style="margin: 10px 0 0 20px;">
-                <?php foreach ($errors as $error): ?>
-                    <li><?php echo htmlspecialchars($error); ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-    <?php endif; ?>
-
     <!-- ===== FORMULAIRE DE CRÉATION ===== -->
     <div class="admin-panel">
         <h3>Créer un nouvel article</h3>
@@ -225,22 +215,25 @@ if (isset($_GET['success'])) {
 
             <div class="form-group">
                 <label for="titre">Titre *</label>
-                <input type="text" id="titre" name="titre" class="form-control" value="<?php echo htmlspecialchars($_POST['titre'] ?? ''); ?>">
                 <?php if (isset($errors['titre'])): ?>
-                    <span class="error-message"><?php echo $errors['titre']; ?></span>
+                    <span class="error-message"><?php echo htmlspecialchars($errors['titre']); ?></span>
                 <?php endif; ?>
+                <input type="text" id="titre" name="titre" class="form-control" value="<?php echo htmlspecialchars($_POST['titre'] ?? ''); ?>">
             </div>
 
             <div class="form-group">
                 <label for="content">Contenu *</label>
-                <textarea id="content" name="content" class="form-control" rows="6"><?php echo htmlspecialchars($_POST['content'] ?? ''); ?></textarea>
                 <?php if (isset($errors['content'])): ?>
-                    <span class="error-message"><?php echo $errors['content']; ?></span>
+                    <span class="error-message"><?php echo htmlspecialchars($errors['content']); ?></span>
                 <?php endif; ?>
+                <textarea id="content" name="content" class="form-control" rows="6"><?php echo htmlspecialchars($_POST['content'] ?? ''); ?></textarea>
             </div>
 
             <div class="form-group">
                 <label for="categorie">Catégorie *</label>
+                <?php if (isset($errors['categorie'])): ?>
+                    <span class="error-message"><?php echo htmlspecialchars($errors['categorie']); ?></span>
+                <?php endif; ?>
                 <select id="categorie" name="categorie" class="form-control">
                     <option value="">Choisir une catégorie</option>
                     <option value="Gaming" <?php echo (isset($_POST['categorie']) && $_POST['categorie'] === 'Gaming') ? 'selected' : ''; ?>>Gaming</option>
@@ -248,22 +241,19 @@ if (isset($_GET['success'])) {
                     <option value="Esport" <?php echo (isset($_POST['categorie']) && $_POST['categorie'] === 'Esport') ? 'selected' : ''; ?>>Esport</option>
                     <option value="Communauté" <?php echo (isset($_POST['categorie']) && $_POST['categorie'] === 'Communauté') ? 'selected' : ''; ?>>Communauté</option>
                 </select>
-                <?php if (isset($errors['categorie'])): ?>
-                    <span class="error-message"><?php echo $errors['categorie']; ?></span>
-                <?php endif; ?>
             </div>
 
             <div class="form-group">
                 <label for="image">Image (JPG, PNG, GIF, WebP - Max 5MB)</label>
+                <?php if (isset($errors['image'])): ?>
+                    <span class="error-message"><?php echo htmlspecialchars($errors['image']); ?></span>
+                <?php endif; ?>
                 <div class="file-input-wrapper">
                     <span class="file-input-button">Choisir une image</span>
                     <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(this, 'preview-create')">
                 </div>
                 <div id="file-name-create" class="file-name"></div>
                 <img id="preview-create" class="preview-image" alt="Aperçu">
-                <?php if (isset($errors['image'])): ?>
-                    <span class="error-message"><?php echo $errors['image']; ?></span>
-                <?php endif; ?>
             </div>
 
             <button type="submit" class="btn btn-primary">Créer l'article</button>
@@ -274,7 +264,7 @@ if (isset($_GET['success'])) {
     <div class="admin-panel">
         <h3>Liste des articles (<?php echo count($articles); ?>)</h3>
 
-        <?php if (empty($articles)): ?>
+        <?php if (empty($articles) || isset($articles['error'])): ?>
             <div class="no-articles">
                 <p>Aucun article disponible. Créez votre premier article !</p>
             </div>
@@ -295,17 +285,17 @@ if (isset($_GET['success'])) {
                         <?php foreach ($articles as $article): ?>
                             <tr>
                                 <td>
-                                    <img src="<?php echo $article['image']; ?>" alt="<?php echo $article['titre']; ?>" class="article-image">
+                                    <img src="<?php echo htmlspecialchars($article['image']); ?>" alt="<?php echo htmlspecialchars($article['titre']); ?>" class="article-image">
                                 </td>
                                 <td>
-                                    <div class="article-title"><?php echo $article['titre']; ?></div>
-                                    <div class="article-excerpt"><?php echo substr($article['content'], 0, 100) . '...'; ?></div>
+                                    <div class="article-title"><?php echo htmlspecialchars($article['titre']); ?></div>
+                                    <div class="article-excerpt"><?php echo htmlspecialchars(substr($article['content'], 0, 100)) . '...'; ?></div>
                                 </td>
                                 <td>
-                                    <span class="category-badge"><?php echo $article['categorie']; ?></span>
+                                    <span class="category-badge"><?php echo htmlspecialchars($article['categorie']); ?></span>
                                 </td>
                                 <td>
-                                    <div class="article-meta"><?php echo $article['date_publication']; ?></div>
+                                    <div class="article-meta"><?php echo htmlspecialchars($article['date_publication']); ?></div>
                                 </td>
                                 <td class="actions-cell">
                                     <button class="btn btn-edit" onclick="editArticle(<?php echo $article['id_article']; ?>)">
@@ -313,7 +303,7 @@ if (isset($_GET['success'])) {
                                     </button>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="delete_article" value="<?php echo $article['id_article']; ?>">
-                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.')">
+                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet article ? Tous les commentaires associés seront également supprimés. Cette action est irréversible.')">
                                             Supprimer
                                         </button>
                                     </form>
@@ -347,20 +337,12 @@ if (isset($_GET['success'])) {
 
 <!-- ===== SCRIPT JS ===== -->
 <script>
-    // Données des articles pour JavaScript
-    const articlesData = {
-    <?php foreach ($articles as $article): ?>
-    <?php $rawArticle = $blogController->show($article['id_article']); ?>
-    <?php echo $article['id_article']; ?>: {
-        titre: "<?php echo addslashes($rawArticle['titre']); ?>",
-            content: `<?php echo addslashes($rawArticle['content']); ?>`,
-            categorie: "<?php echo $rawArticle['categorie']; ?>",
-            image: "<?php echo $rawArticle['image']; ?>"
-    },
-    <?php endforeach; ?>
-    };
+    // ✅ Données des articles depuis PHP - PROPRE avec json_encode()
+    const articlesData = <?php echo json_encode(array_column($articles, null, 'id_article')); ?>;
 
-    // Prévisualisation de l'image
+    /**
+     * Prévisualisation de l'image (void)
+     */
     function previewImage(input, previewId) {
         const preview = document.getElementById(previewId);
         const fileNameDiv = document.getElementById('file-name-' + previewId.split('-')[1]);
@@ -368,12 +350,10 @@ if (isset($_GET['success'])) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
 
-            // Afficher le nom du fichier
             if (fileNameDiv) {
-                fileNameDiv.textContent = '📎 Fichier sélectionné : ' + file.name;
+                fileNameDiv.textContent = '📁 Fichier sélectionné : ' + file.name;
             }
 
-            // Prévisualiser l'image
             const reader = new FileReader();
             reader.onload = function(e) {
                 preview.src = e.target.result;
@@ -383,9 +363,12 @@ if (isset($_GET['success'])) {
         }
     }
 
-    // Modifier un article
+    /**
+     * Modifier un article (void)
+     */
     function editArticle(articleId) {
         const article = articlesData[articleId];
+
         if (!article) {
             alert('Article non trouvé');
             return;
@@ -402,12 +385,12 @@ if (isset($_GET['success'])) {
 
                 <div class="form-group">
                     <label for="edit_titre">Titre *</label>
-                    <input type="text" id="edit_titre" name="titre" class="form-control" value="${article.titre}">
+                    <input type="text" id="edit_titre" name="titre" class="form-control" value="${escapeHtml(article.titre)}">
                 </div>
 
                 <div class="form-group">
                     <label for="edit_content">Contenu *</label>
-                    <textarea id="edit_content" name="content" class="form-control" rows="6">${article.content}</textarea>
+                    <textarea id="edit_content" name="content" class="form-control" rows="6">${escapeHtml(article.full_content)}</textarea>
                 </div>
 
                 <div class="form-group">
@@ -423,7 +406,7 @@ if (isset($_GET['success'])) {
                 <div class="form-group">
                     <label>Image actuelle</label>
                     <br>
-                    <img src="${article.image}" class="current-image" alt="Image actuelle">
+                    <img src="${escapeHtml(article.image)}" class="current-image" alt="Image actuelle">
                 </div>
 
                 <div class="form-group">
@@ -448,10 +431,27 @@ if (isset($_GET['success'])) {
         document.body.style.overflow = 'hidden';
     }
 
+    /**
+     * Fermer la modal d'édition (void)
+     */
     function closeEditModal() {
         const modal = document.getElementById('edit-modal');
         modal.classList.remove('active');
         document.body.style.overflow = 'auto';
+    }
+
+    /**
+     * Échapper les caractères spéciaux HTML (string)
+     */
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
     }
 
     // Fermer le modal avec Échap

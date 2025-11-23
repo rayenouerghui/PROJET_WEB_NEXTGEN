@@ -5,126 +5,116 @@ class BlogModel {
     private $pdo;
     private $table = 'article';
 
+    // Propriétés de l'article (attrs)
+    private $id_article;
+    private $titre;
+    private $content;
+    private $date_publication;
+    private $categorie;
+    private $image;
+    private $id_auteur;
+
     public function __construct() {
         $database = Database::getInstance();
         $this->pdo = $database->getConnection();
     }
 
-    // Récupérer tous les articles
-    public function getAllArticles() {
-        try {
-            $query = "SELECT * FROM {$this->table} ORDER BY date_publication DESC";
-            $stmt = $this->pdo->prepare($query);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la récupération des articles: " . $e->getMessage());
-            return [];
-        }
+    // ===== GETTERS =====
+    public function getId() {
+        return $this->id_article;
     }
 
-    // Récupérer un article par son ID
-    public function getArticleById($id_article) {
-        try {
-            $query = "SELECT * FROM {$this->table} WHERE id_article = :id";
-            $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':id', $id_article, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la récupération de l'article: " . $e->getMessage());
-            return false;
-        }
+    public function getTitre() {
+        return $this->titre;
     }
 
-    // Créer un nouvel article
-    public function createArticle($data) {
-        try {
-            $query = "INSERT INTO {$this->table} (titre, content, date_publication, categorie, image, id_auteur) 
-                     VALUES (:titre, :content, :date_publication, :categorie, :image, :id_auteur)";
-
-            $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':titre', $data['titre']);
-            $stmt->bindParam(':content', $data['content']);
-            $stmt->bindParam(':date_publication', $data['date_publication']);
-            $stmt->bindParam(':categorie', $data['categorie']);
-            $stmt->bindParam(':image', $data['image']);
-            $stmt->bindParam(':id_auteur', $data['id_auteur'], PDO::PARAM_INT);
-
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la création de l'article: " . $e->getMessage());
-            return false;
-        }
+    public function getContent() {
+        return $this->content;
     }
 
-    // Mettre à jour un article
-    public function updateArticle($id_article, $data) {
-        try {
-            $query = "UPDATE {$this->table} SET 
-                     titre = :titre, 
-                     content = :content, 
-                     date_publication = :date_publication, 
-                     categorie = :categorie, 
-                     image = :image, 
-                     id_auteur = :id_auteur 
-                     WHERE id_article = :id";
-
-            $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':id', $id_article, PDO::PARAM_INT);
-            $stmt->bindParam(':titre', $data['titre']);
-            $stmt->bindParam(':content', $data['content']);
-            $stmt->bindParam(':date_publication', $data['date_publication']);
-            $stmt->bindParam(':categorie', $data['categorie']);
-            $stmt->bindParam(':image', $data['image']);
-            $stmt->bindParam(':id_auteur', $data['id_auteur'], PDO::PARAM_INT);
-
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la mise à jour de l'article: " . $e->getMessage());
-            return false;
-        }
+    public function getDatePublication() {
+        return $this->date_publication;
     }
 
-    // Supprimer un article
-    public function deleteArticle($id_article) {
-        try {
-            $query = "DELETE FROM {$this->table} WHERE id_article = :id";
-            $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':id', $id_article, PDO::PARAM_INT);
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la suppression de l'article: " . $e->getMessage());
-            return false;
-        }
+    public function getCategorie() {
+        return $this->categorie;
     }
 
-    // Récupérer les articles par catégorie
-    public function getArticlesByCategory($categorie) {
-        try {
-            $query = "SELECT * FROM {$this->table} WHERE categorie = :categorie ORDER BY date_publication DESC";
-            $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':categorie', $categorie);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la récupération des articles par catégorie: " . $e->getMessage());
-            return [];
-        }
+    public function getImage() {
+        return $this->image;
     }
 
-    // Récupérer les derniers articles (pour la page d'accueil)
-    public function getRecentArticles($limit = 3) {
-        try {
-            $query = "SELECT * FROM {$this->table} ORDER BY date_publication DESC LIMIT :limit";
-            $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la récupération des articles récents: " . $e->getMessage());
-            return [];
-        }
+    public function getIdAuteur() {
+        return $this->id_auteur;
+    }
+
+    public function getPDO() {
+        return $this->pdo;
+    }
+
+    public function getTableName() {
+        return $this->table;
+    }
+
+    // ===== SETTERS =====
+    public function setId($id_article) {
+        $this->id_article = $id_article;
+        return $this;
+    }
+
+    public function setTitre($titre) {
+        $this->titre = trim($titre);
+        return $this;
+    }
+
+    public function setContent($content) {
+        $this->content = trim($content);
+        return $this;
+    }
+
+    public function setDatePublication($date_publication) {
+        $this->date_publication = $date_publication;
+        return $this;
+    }
+
+    public function setCategorie($categorie) {
+        $this->categorie = trim($categorie);
+        return $this;
+    }
+
+    public function setImage($image) {
+        $this->image = $image;
+        return $this;
+    }
+
+    public function setIdAuteur($id_auteur) {
+        $this->id_auteur = $id_auteur;
+        return $this;
+    }
+
+    // ===== MÉTHODE POUR CHARGER LES DONNÉES DANS LES PROPRIÉTÉS =====
+    public function loadFromArray($data) {
+        if (isset($data['id_article'])) $this->setId($data['id_article']);
+        if (isset($data['titre'])) $this->setTitre($data['titre']);
+        if (isset($data['content'])) $this->setContent($data['content']);
+        if (isset($data['date_publication'])) $this->setDatePublication($data['date_publication']);
+        if (isset($data['categorie'])) $this->setCategorie($data['categorie']);
+        if (isset($data['image'])) $this->setImage($data['image']);
+        if (isset($data['id_auteur'])) $this->setIdAuteur($data['id_auteur']);
+        return $this;
+    }
+
+    // ===== MÉTHODE POUR OBTENIR LES DONNÉES SOUS FORME DE TABLEAU =====
+    public function toArray() {
+        return [
+            'id_article' => $this->id_article,
+            'titre' => $this->titre,
+            'content' => $this->content,
+            'date_publication' => $this->date_publication,
+            'categorie' => $this->categorie,
+            'image' => $this->image,
+            'id_auteur' => $this->id_auteur
+        ];
     }
 }
 ?>
