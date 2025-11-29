@@ -3,7 +3,7 @@
 | N° | Tâche                     | Responsable        |
 |----|---------------------------|--------------------|
 | 1  | Livraison & Trajet        | Rayen              |
-| 2  |                           |                    |
+| 2  |Retour et réclamation      | louay              |
 | 3  |                           |                    |
 | 4  |                           |                    |
 | 5  |                           |                    |
