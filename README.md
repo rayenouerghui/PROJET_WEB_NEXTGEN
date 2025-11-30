@@ -4,7 +4,7 @@
 |----|---------------------------|--------------------|
 | 1  | Livraison & Trajet        | Rayen              |
 | 2  |Retour et réclamation      | louay              |
-| 3  |                           |                    |
-| 4  |                           |                    |
+| 3  |gestion de produit         | dhia               |
+| 4  |utilisateur                | ahlem              |
 | 5  |                           |                    |
 | 6  |                           |                    |
