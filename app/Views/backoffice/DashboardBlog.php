@@ -1,24 +1,55 @@
 <?php
 
-
 require_once __DIR__ . '/../../../app/Controllers/BlogController.php';
+require_once __DIR__ . '/../../../app/Controllers/CategoryController.php';
 
-// Initialiser le contrôleur
+// Initialiser les contrôleurs
 $blogController = new BlogController();
+$categoryController = new CategoryController();
 
 // Récupérer tous les articles
 $articles = $blogController->index();
+
+// Récupérer toutes les catégories
+$categories = $categoryController->getAllCategories();
 
 // Traitement des actions
 $action = $_POST['action'] ?? '';
 $message = '';
 $errors = [];
 
+// ===== CRÉATION DE CATÉGORIE =====
+if ($action === 'create_category' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nom = trim($_POST['nom'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+
+    // Validation
+    if (empty($nom)) {
+        $errors['nom'] = 'Le nom de la catégorie est obligatoire';
+    } elseif (strlen($nom) < 2) {
+        $errors['nom'] = 'Le nom doit contenir au moins 2 caractères';
+    }
+
+    if (empty($errors)) {
+        $result = $categoryController->create([
+                'nom' => $nom,
+                'description' => $description
+        ]);
+
+        if ($result['success']) {
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?success=create_category');
+            exit();
+        } else {
+            $message = '<div class="alert alert-danger">' . htmlspecialchars($result['message']) . '</div>';
+        }
+    }
+}
+
 // ===== CRÉATION D'ARTICLE =====
 if ($action === 'create_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $titre = trim($_POST['titre'] ?? '');
     $content = trim($_POST['content'] ?? '');
-    $categorie = trim($_POST['categorie'] ?? '');
+    $id_categorie = (int)($_POST['id_categorie'] ?? 0);
 
     // Validation
     if (empty($titre)) {
@@ -33,10 +64,8 @@ if ($action === 'create_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['content'] = 'Le contenu doit contenir au moins 10 caractères';
     }
 
-    if (empty($categorie)) {
+    if (empty($id_categorie)) {
         $errors['categorie'] = 'La catégorie est obligatoire';
-    } elseif (!in_array($categorie, ['Gaming', 'VR', 'Esport', 'Communauté'])) {
-        $errors['categorie'] = 'Catégorie invalide';
     }
 
     // Validation de l'image
@@ -58,7 +87,15 @@ if ($action === 'create_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $result = $blogController->create($_POST, $_FILES);
+        // Préparer les données avec l'ID de catégorie
+        $articleData = [
+                'titre' => $titre,
+                'content' => $content,
+                'id_categorie' => $id_categorie,
+                'id_auteur' => 1 // ID d'auteur par défaut
+        ];
+
+        $result = $blogController->create($articleData, $_FILES);
         if ($result['success']) {
             header('Location: ' . $_SERVER['PHP_SELF'] . '?success=create');
             exit();
@@ -73,7 +110,7 @@ if ($action === 'update_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $articleId = (int)$_POST['id_article'];
     $titre = trim($_POST['titre'] ?? '');
     $content = trim($_POST['content'] ?? '');
-    $categorie = trim($_POST['categorie'] ?? '');
+    $id_categorie = (int)($_POST['id_categorie'] ?? 0);
 
     // Validation
     if (empty($titre)) {
@@ -88,10 +125,8 @@ if ($action === 'update_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['content'] = 'Le contenu doit contenir au moins 10 caractères';
     }
 
-    if (empty($categorie)) {
+    if (empty($id_categorie)) {
         $errors['categorie'] = 'La catégorie est obligatoire';
-    } elseif (!in_array($categorie, ['Gaming', 'VR', 'Esport', 'Communauté'])) {
-        $errors['categorie'] = 'Catégorie invalide';
     }
 
     // Validation de l'image si fournie
@@ -113,7 +148,15 @@ if ($action === 'update_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $result = $blogController->update($articleId, $_POST, $_FILES);
+        // Préparer les données avec l'ID de catégorie
+        $articleData = [
+                'titre' => $titre,
+                'content' => $content,
+                'id_categorie' => $id_categorie,
+                'id_auteur' => 1 // ID d'auteur par défaut
+        ];
+
+        $result = $blogController->update($articleId, $articleData, $_FILES);
         if ($result['success']) {
             header('Location: ' . $_SERVER['PHP_SELF'] . '?success=update');
             exit();
@@ -138,6 +181,11 @@ if (isset($_POST['delete_article'])) {
 // ===== MESSAGES DE SUCCÈS =====
 if (isset($_GET['success'])) {
     switch ($_GET['success']) {
+        case 'create_category':
+            $message = '<div class="alert alert-success">Catégorie créée avec succès !</div>';
+            // Recharger les catégories
+            $categories = $categoryController->getAllCategories();
+            break;
         case 'create':
             $message = '<div class="alert alert-success">Article créé avec succès !</div>';
             // Recharger les articles
@@ -207,7 +255,34 @@ if (isset($_GET['success'])) {
 
     <?php echo $message; ?>
 
-    <!-- ===== FORMULAIRE DE CRÉATION ===== -->
+    <!-- ===== BOUTON POUR CRÉER UNE CATÉGORIE ===== -->
+    <div class="admin-panel">
+        <div class="panel-header">
+            <h3>Gestion des Catégories</h3>
+            <button class="btn btn-secondary" onclick="openCategoryModal()">
+                + Nouvelle Catégorie
+            </button>
+        </div>
+        <div class="categories-list">
+            <?php if (!empty($categories)): ?>
+                <div class="categories-grid">
+                    <?php foreach ($categories as $category): ?>
+                        <div class="category-card">
+                            <h4><?php echo htmlspecialchars($category['nom']); ?></h4>
+                            <?php if (!empty($category['description'])): ?>
+                                <p><?php echo htmlspecialchars($category['description']); ?></p>
+                            <?php endif; ?>
+                            <small>Slug: <?php echo htmlspecialchars($category['slug']); ?></small>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p class="no-categories">Aucune catégorie disponible. Créez votre première catégorie !</p>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- ===== FORMULAIRE DE CRÉATION D'ARTICLE ===== -->
     <div class="admin-panel">
         <h3>Créer un nouvel article</h3>
         <form method="POST" enctype="multipart/form-data" class="admin-form" novalidate>
@@ -230,16 +305,18 @@ if (isset($_GET['success'])) {
             </div>
 
             <div class="form-group">
-                <label for="categorie">Catégorie *</label>
+                <label for="id_categorie">Catégorie *</label>
                 <?php if (isset($errors['categorie'])): ?>
                     <span class="error-message"><?php echo htmlspecialchars($errors['categorie']); ?></span>
                 <?php endif; ?>
-                <select id="categorie" name="categorie" class="form-control">
+                <select id="id_categorie" name="id_categorie" class="form-control">
                     <option value="">Choisir une catégorie</option>
-                    <option value="Gaming" <?php echo (isset($_POST['categorie']) && $_POST['categorie'] === 'Gaming') ? 'selected' : ''; ?>>Gaming</option>
-                    <option value="VR" <?php echo (isset($_POST['categorie']) && $_POST['categorie'] === 'VR') ? 'selected' : ''; ?>>VR</option>
-                    <option value="Esport" <?php echo (isset($_POST['categorie']) && $_POST['categorie'] === 'Esport') ? 'selected' : ''; ?>>Esport</option>
-                    <option value="Communauté" <?php echo (isset($_POST['categorie']) && $_POST['categorie'] === 'Communauté') ? 'selected' : ''; ?>>Communauté</option>
+                    <?php foreach ($categories as $category): ?>
+                        <option value="<?php echo htmlspecialchars($category['id_categorie']); ?>"
+                                <?php echo (isset($_POST['id_categorie']) && $_POST['id_categorie'] == $category['id_categorie']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($category['nom']); ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </div>
 
@@ -292,7 +369,7 @@ if (isset($_GET['success'])) {
                                     <div class="article-excerpt"><?php echo htmlspecialchars(substr($article['content'], 0, 100)) . '...'; ?></div>
                                 </td>
                                 <td>
-                                    <span class="category-badge"><?php echo htmlspecialchars($article['categorie']); ?></span>
+                                    <span class="category-badge"><?php echo htmlspecialchars($article['categorie_nom']); ?></span>
                                 </td>
                                 <td>
                                     <div class="article-meta"><?php echo htmlspecialchars($article['date_publication']); ?></div>
@@ -318,7 +395,33 @@ if (isset($_GET['success'])) {
     </div>
 </div>
 
-<!-- ===== MODAL DE MODIFICATION ===== -->
+<!-- ===== MODAL DE CRÉATION DE CATÉGORIE ===== -->
+<div id="category-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeCategoryModal()">&times;</span>
+        <h2>Créer une nouvelle catégorie</h2>
+        <form method="POST" class="admin-form" novalidate>
+            <input type="hidden" name="action" value="create_category">
+
+            <div class="form-group">
+                <label for="category_nom">Nom de la catégorie *</label>
+                <input type="text" id="category_nom" name="nom" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category_description">Description</label>
+                <textarea id="category_description" name="description" class="form-control" rows="4"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Créer la catégorie</button>
+                <button type="button" class="btn btn-cancel" onclick="closeCategoryModal()">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL DE MODIFICATION D'ARTICLE ===== -->
 <div id="edit-modal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeEditModal()">&times;</span>
@@ -339,6 +442,24 @@ if (isset($_GET['success'])) {
 <script>
     // ✅ Données des articles depuis PHP - PROPRE avec json_encode()
     const articlesData = <?php echo json_encode(array_column($articles, null, 'id_article')); ?>;
+
+    /**
+     * Ouvrir la modal de création de catégorie (void)
+     */
+    function openCategoryModal() {
+        const modal = document.getElementById('category-modal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * Fermer la modal de création de catégorie (void)
+     */
+    function closeCategoryModal() {
+        const modal = document.getElementById('category-modal');
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
 
     /**
      * Prévisualisation de l'image (void)
@@ -394,12 +515,13 @@ if (isset($_GET['success'])) {
                 </div>
 
                 <div class="form-group">
-                    <label for="edit_categorie">Catégorie *</label>
-                    <select id="edit_categorie" name="categorie" class="form-control">
-                        <option value="Gaming" ${article.categorie === 'Gaming' ? 'selected' : ''}>Gaming</option>
-                        <option value="VR" ${article.categorie === 'VR' ? 'selected' : ''}>VR</option>
-                        <option value="Esport" ${article.categorie === 'Esport' ? 'selected' : ''}>Esport</option>
-                        <option value="Communauté" ${article.categorie === 'Communauté' ? 'selected' : ''}>Communauté</option>
+                    <label for="edit_id_categorie">Catégorie *</label>
+                    <select id="edit_id_categorie" name="id_categorie" class="form-control">
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?php echo htmlspecialchars($category['id_categorie']); ?>" ${article.id_categorie == <?php echo $category['id_categorie']; ?> ? 'selected' : ''}>
+                                <?php echo htmlspecialchars($category['nom']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
@@ -454,19 +576,95 @@ if (isset($_GET['success'])) {
         return text.replace(/[&<>"']/g, m => map[m]);
     }
 
-    // Fermer le modal avec Échap
+    // Fermer les modals avec Échap
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeEditModal();
+            closeCategoryModal();
         }
     });
 
-    // Fermer le modal en cliquant en dehors
-    document.getElementById('edit-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeEditModal();
-        }
+    // Fermer les modals en cliquant en dehors
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                if (this.id === 'edit-modal') {
+                    closeEditModal();
+                } else if (this.id === 'category-modal') {
+                    closeCategoryModal();
+                }
+            }
+        });
     });
 </script>
+
+<style>
+    /* Styles pour la gestion des catégories */
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .category-card {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .category-card h4 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 1.1em;
+    }
+
+    .category-card p {
+        margin: 0 0 10px 0;
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    .category-card small {
+        color: #888;
+        font-size: 0.8em;
+    }
+
+    .no-categories {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 20px;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+</style>
 </body>
 </html>

@@ -92,7 +92,7 @@ class BlogModel {
         return $this;
     }
 
-    // ===== MÉTHODE POUR CHARGER LES DONNÉES DANS LES PROPRIÉTÉS =====
+    // ===== MÉTHODE POUR CHARGER LES DONNÉES DANS LES PROPRIÉTÉS hedhom f controlleur =====
     public function loadFromArray($data) {
         if (isset($data['id_article'])) $this->setId($data['id_article']);
         if (isset($data['titre'])) $this->setTitre($data['titre']);

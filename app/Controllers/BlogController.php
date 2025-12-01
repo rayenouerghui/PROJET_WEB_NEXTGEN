@@ -1,15 +1,20 @@
 <?php
 require_once __DIR__ . '/../Models/BlogModel.php';
+require_once __DIR__ . '/../Models/CategoryModel.php';
+require_once __DIR__ . '/CategoryController.php';
 
 class BlogController {
     private $blogModel;
+    private $categoryModel;
+    private $categoryController;
     private $uploadDir = __DIR__ . '/../../public/uploads/articles/';
     private $uploadUrl = '/PROJET_WEB_NEXTGEN/public/uploads/articles/';
 
     public function __construct() {
         $this->blogModel = new BlogModel();
+        $this->categoryModel = new CategoryModel();
+        $this->categoryController = new CategoryController();
 
-        // Créer le dossier uploads s'il n'existe pas
         if (!file_exists($this->uploadDir)) {
             mkdir($this->uploadDir, 0755, true);
         }
@@ -21,8 +26,8 @@ class BlogController {
     public function index() {
         try {
             $articles = $this->getAllArticles();
+            error_log("BlogController::index - Retrieved " . count($articles) . " articles");
 
-            // Transformer les données pour le frontend
             $formattedArticles = [];
             foreach ($articles as $article) {
                 $formattedArticles[] = [
@@ -31,9 +36,12 @@ class BlogController {
                     'content' => $this->truncateContent($article['content'], 150),
                     'full_content' => $article['content'],
                     'date_publication' => $this->formatDate($article['date_publication']),
-                    'categorie' => htmlspecialchars($article['categorie']),
-                    'image' => $article['image'] ?: $this->getDefaultImage($article['categorie']),
-                    'id_auteur' => $article['id_auteur']
+                    'id_categorie' => $article['id_categorie'] ?? '',
+                    'categorie' => htmlspecialchars($article['categorie_nom']),
+                    'categorie_nom' => htmlspecialchars($article['categorie_nom']),
+                    'categorie_slug' => $article['categorie_slug'] ?? '',
+                    'image' => $article['image'] ?: $this->getDefaultImage($article['categorie_nom']),
+                    'id_auteur' => $article['id_auteur'] ?? 1
                 ];
             }
 
@@ -55,15 +63,17 @@ class BlogController {
                 return ['error' => 'Article non trouvé'];
             }
 
-            // Formater les données
             $formattedArticle = [
                 'id_article' => $article['id_article'],
                 'titre' => htmlspecialchars($article['titre']),
                 'content' => $article['content'],
                 'date_publication' => $this->formatDate($article['date_publication']),
-                'categorie' => htmlspecialchars($article['categorie']),
-                'image' => $article['image'] ?: $this->getDefaultImage($article['categorie']),
-                'id_auteur' => $article['id_auteur']
+                'id_categorie' => $article['id_categorie'] ?? '',
+                'categorie' => htmlspecialchars($article['categorie_nom']),
+                'categorie_nom' => htmlspecialchars($article['categorie_nom']),
+                'categorie_slug' => $article['categorie_slug'] ?? '',
+                'image' => $article['image'] ?: $this->getDefaultImage($article['categorie_nom']),
+                'id_auteur' => $article['id_auteur'] ?? 1
             ];
 
             return $formattedArticle;
@@ -78,13 +88,15 @@ class BlogController {
      */
     public function create($data, $files = null) {
         try {
-            // Validation des données
             $errors = $this->validateArticleData($data);
             if (!empty($errors)) {
                 return ['success' => false, 'errors' => $errors];
             }
 
-            // Gérer l'upload de l'image
+            if (!$this->categoryExists($data['id_categorie'])) {
+                return ['success' => false, 'message' => 'Catégorie invalide'];
+            }
+
             $imagePath = '';
             if ($files && isset($files['image']) && $files['image']['error'] === UPLOAD_ERR_OK) {
                 $uploadResult = $this->uploadImage($files['image']);
@@ -95,12 +107,11 @@ class BlogController {
                 }
             }
 
-            // Préparer les données
             $articleData = [
                 'titre' => trim($data['titre']),
                 'content' => trim($data['content']),
                 'date_publication' => date('Y-m-d H:i:s'),
-                'categorie' => trim($data['categorie']),
+                'id_categorie' => (int)$data['id_categorie'],
                 'image' => $imagePath,
                 'id_auteur' => $data['id_auteur'] ?? 1
             ];
@@ -110,7 +121,6 @@ class BlogController {
             if ($result) {
                 return ['success' => true, 'message' => 'Article créé avec succès'];
             } else {
-                // Supprimer l'image si l'insertion échoue
                 if ($imagePath && file_exists($this->uploadDir . basename($imagePath))) {
                     unlink($this->uploadDir . basename($imagePath));
                 }
@@ -127,24 +137,24 @@ class BlogController {
      */
     public function update($id_article, $data, $files = null) {
         try {
-            // Vérifier si l'article existe
             $existingArticle = $this->getArticleById($id_article);
             if (!$existingArticle) {
                 return ['success' => false, 'message' => 'Article non trouvé'];
             }
 
-            // Validation des données
             $errors = $this->validateArticleData($data);
             if (!empty($errors)) {
                 return ['success' => false, 'errors' => $errors];
             }
 
-            // Gérer l'upload de la nouvelle image
-            $imagePath = $existingArticle['image'];
+            if (!$this->categoryExists($data['id_categorie'])) {
+                return ['success' => false, 'message' => 'Catégorie invalide'];
+            }
+
+            $imagePath = $existingArticle['image'] ?? '';
             if ($files && isset($files['image']) && $files['image']['error'] === UPLOAD_ERR_OK) {
                 $uploadResult = $this->uploadImage($files['image']);
                 if ($uploadResult['success']) {
-                    // Supprimer l'ancienne image si elle existe
                     if ($existingArticle['image'] && file_exists($this->uploadDir . basename($existingArticle['image']))) {
                         unlink($this->uploadDir . basename($existingArticle['image']));
                     }
@@ -154,14 +164,13 @@ class BlogController {
                 }
             }
 
-            // Préparer les données
             $articleData = [
                 'titre' => trim($data['titre']),
                 'content' => trim($data['content']),
                 'date_publication' => $existingArticle['date_publication'],
-                'categorie' => trim($data['categorie']),
+                'id_categorie' => (int)$data['id_categorie'],
                 'image' => $imagePath,
-                'id_auteur' => $data['id_auteur'] ?? $existingArticle['id_auteur']
+                'id_auteur' => $data['id_auteur'] ?? ($existingArticle['id_auteur'] ?? 1)
             ];
 
             $result = $this->updateArticleDB($id_article, $articleData);
@@ -178,47 +187,82 @@ class BlogController {
     }
 
     /**
-     * Supprimer un article, ses commentaires et son image
+     * Delete article with CASCADE deletion of comments
+     * When an article is deleted:
+     * 1. Delete all comments associated with this article
+     * 2. Delete the article's image file
+     * 3. Delete the article itself
      */
     public function delete($id_article) {
         try {
-            // Vérifier si l'article existe
+            // Check if article exists
             $existingArticle = $this->getArticleById($id_article);
             if (!$existingArticle) {
                 return ['success' => false, 'message' => 'Article non trouvé'];
             }
 
-            // Supprimer les commentaires associés d'abord
-            $commentsDeleted = $this->deleteCommentsByArticle($id_article);
+            $pdo = $this->blogModel->getPDO();
 
-            if (!$commentsDeleted) {
-                error_log("Avertissement: Impossible de supprimer les commentaires de l'article ID: " . $id_article);
+            // Start transaction for atomic operation
+            $pdo->beginTransaction();
+
+            try {
+                // Step 1: Delete all comments associated with this article (CASCADE)
+                $deletedCommentsCount = $this->deleteCommentsByArticle($id_article);
+
+                if ($deletedCommentsCount === false) {
+                    $pdo->rollBack();
+                    return ['success' => false, 'message' => 'Erreur lors de la suppression des commentaires'];
+                }
+
+                // Step 2: Delete the article from database
+                $articleDeleted = $this->deleteArticleDB($id_article);
+
+                if (!$articleDeleted) {
+                    $pdo->rollBack();
+                    return ['success' => false, 'message' => 'Erreur lors de la suppression de l\'article'];
+                }
+
+                // Commit transaction
+                $pdo->commit();
+
+                // Step 3: Delete image file (outside transaction - best effort)
+                if (!empty($existingArticle['image'])) {
+                    $imagePath = $this->uploadDir . basename($existingArticle['image']);
+                    if (file_exists($imagePath)) {
+                        @unlink($imagePath);
+                    }
+                }
+
+                $message = sprintf(
+                    'Article supprimé avec succès. %d commentaire(s) supprimé(s).',
+                    $deletedCommentsCount
+                );
+
+                return [
+                    'success' => true,
+                    'message' => $message,
+                    'deleted_comments' => $deletedCommentsCount
+                ];
+
+            } catch (Exception $e) {
+                // Rollback on any error
+                $pdo->rollBack();
+                throw $e;
             }
 
-            // Supprimer l'image associée
-            if ($existingArticle['image'] && file_exists($this->uploadDir . basename($existingArticle['image']))) {
-                unlink($this->uploadDir . basename($existingArticle['image']));
-            }
-
-            $result = $this->deleteArticleDB($id_article);
-
-            if ($result) {
-                return ['success' => true, 'message' => 'Article et ses commentaires supprimés avec succès'];
-            } else {
-                return ['success' => false, 'message' => 'Erreur lors de la suppression de l\'article'];
-            }
         } catch (Exception $e) {
             error_log("Erreur dans BlogController::delete: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Erreur serveur'];
+            return ['success' => false, 'message' => 'Erreur serveur lors de la suppression'];
         }
     }
 
     /**
      * Récupérer les articles par catégorie
      */
-    public function getByCategory($categorie) {
+    public function getByCategory($id_categorie) {
         try {
-            $articles = $this->getArticlesByCategory($categorie);
+            $articles = $this->getArticlesByCategoryId($id_categorie);
 
             $formattedArticles = [];
             foreach ($articles as $article) {
@@ -228,12 +272,16 @@ class BlogController {
                     'content' => $this->truncateContent($article['content'], 150),
                     'full_content' => $article['content'],
                     'date_publication' => $this->formatDate($article['date_publication']),
-                    'categorie' => htmlspecialchars($article['categorie']),
-                    'image' => $article['image'] ?: $this->getDefaultImage($article['categorie']),
-                    'id_auteur' => $article['id_auteur']
+                    'id_categorie' => $article['categorie'] ?? '',
+                    'categorie' => htmlspecialchars($article['categorie_nom']),
+                    'categorie_nom' => htmlspecialchars($article['categorie_nom']),
+                    'categorie_slug' => '',
+                    'image' => $article['image'] ?: $this->getDefaultImage($article['categorie_nom']),
+                    'id_auteur' => $article['id_auteur'] ?? 1
                 ];
             }
 
+            error_log("getByCategory returned " . count($formattedArticles) . " articles for category ID: " . $id_categorie);
             return $formattedArticles;
         } catch (Exception $e) {
             error_log("Erreur dans BlogController::getByCategory: " . $e->getMessage());
@@ -256,9 +304,12 @@ class BlogController {
                     'content' => $this->truncateContent($article['content'], 150),
                     'full_content' => $article['content'],
                     'date_publication' => $this->formatDate($article['date_publication']),
-                    'categorie' => htmlspecialchars($article['categorie']),
-                    'image' => $article['image'] ?: $this->getDefaultImage($article['categorie']),
-                    'id_auteur' => $article['id_auteur']
+                    'id_categorie' => $article['id_categorie'] ?? '',
+                    'categorie' => htmlspecialchars($article['categorie_nom']),
+                    'categorie_nom' => htmlspecialchars($article['categorie_nom']),
+                    'categorie_slug' => $article['categorie_slug'] ?? '',
+                    'image' => $article['image'] ?: $this->getDefaultImage($article['categorie_nom']),
+                    'id_auteur' => $article['id_auteur'] ?? 1
                 ];
             }
 
@@ -269,7 +320,7 @@ class BlogController {
         }
     }
 
-    // ===== REQUÊTES SQL (DÉPLACÉES DU MODEL) =====
+    // ===== REQUÊTES SQL =====
 
     /**
      * Récupérer tous les articles
@@ -277,13 +328,42 @@ class BlogController {
     private function getAllArticles() {
         try {
             $pdo = $this->blogModel->getPDO();
-            $table = $this->blogModel->getTableName();
-            $query = "SELECT * FROM {$table} ORDER BY date_publication DESC";
+
+            if (!$pdo) {
+                error_log("PDO connection is null in getAllArticles");
+                return [];
+            }
+
+            $query = "SELECT a.*, COALESCE(c.nom, 'Non catégorisé') AS categorie_nom
+                      FROM article a
+                      LEFT JOIN categorie_article c ON a.categorie = c.id_categorie
+                      ORDER BY a.date_publication DESC";
+
             $stmt = $pdo->prepare($query);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!$stmt) {
+                error_log("Failed to prepare statement: " . implode(", ", $pdo->errorInfo()));
+                return [];
+            }
+
+            $executed = $stmt->execute();
+
+            if (!$executed) {
+                error_log("Failed to execute query: " . implode(", ", $stmt->errorInfo()));
+                return [];
+            }
+
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            error_log("getAllArticles returned " . count($results) . " articles");
+
+            return $results;
+
         } catch (PDOException $e) {
-            error_log("Erreur lors de la récupération des articles: " . $e->getMessage());
+            error_log("PDOException in getAllArticles: " . $e->getMessage());
+            return [];
+        } catch (Exception $e) {
+            error_log("Exception in getAllArticles: " . $e->getMessage());
             return [];
         }
     }
@@ -294,13 +374,17 @@ class BlogController {
     private function getArticleById($id_article) {
         try {
             $pdo = $this->blogModel->getPDO();
-            $table = $this->blogModel->getTableName();
-            $query = "SELECT * FROM {$table} WHERE id_article = :id";
+            $query = "SELECT a.*, COALESCE(c.nom, 'Non catégorisé') AS categorie_nom
+                      FROM article a
+                      LEFT JOIN categorie_article c ON a.categorie = c.id_categorie
+                      WHERE a.id_article = :id";
             $stmt = $pdo->prepare($query);
             $stmt->bindParam(':id', $id_article, PDO::PARAM_INT);
             $stmt->execute();
 
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            $article = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $article;
         } catch (PDOException $e) {
             error_log("Erreur lors de la récupération de l'article: " . $e->getMessage());
             return false;
@@ -322,7 +406,7 @@ class BlogController {
             $stmt->bindParam(':titre', $data['titre']);
             $stmt->bindParam(':content', $data['content']);
             $stmt->bindParam(':date_publication', $data['date_publication']);
-            $stmt->bindParam(':categorie', $data['categorie']);
+            $stmt->bindParam(':categorie', $data['id_categorie']);
             $stmt->bindParam(':image', $data['image']);
             $stmt->bindParam(':id_auteur', $data['id_auteur'], PDO::PARAM_INT);
 
@@ -355,7 +439,7 @@ class BlogController {
             $stmt->bindParam(':titre', $data['titre']);
             $stmt->bindParam(':content', $data['content']);
             $stmt->bindParam(':date_publication', $data['date_publication']);
-            $stmt->bindParam(':categorie', $data['categorie']);
+            $stmt->bindParam(':categorie', $data['id_categorie']);
             $stmt->bindParam(':image', $data['image']);
             $stmt->bindParam(':id_auteur', $data['id_auteur'], PDO::PARAM_INT);
 
@@ -385,7 +469,8 @@ class BlogController {
     }
 
     /**
-     * Supprimer tous les commentaires d'un article
+     * Delete all comments associated with an article (CASCADE)
+     * Returns the number of deleted comments or false on error
      */
     private function deleteCommentsByArticle($id_article) {
         try {
@@ -393,7 +478,12 @@ class BlogController {
             $query = "DELETE FROM commentaire WHERE id_article = :id_article";
             $stmt = $pdo->prepare($query);
             $stmt->bindParam(':id_article', $id_article, PDO::PARAM_INT);
-            return $stmt->execute();
+
+            if ($stmt->execute()) {
+                return $stmt->rowCount(); // Return number of deleted comments
+            } else {
+                return false;
+            }
         } catch (PDOException $e) {
             error_log("Erreur lors de la suppression des commentaires: " . $e->getMessage());
             return false;
@@ -401,36 +491,42 @@ class BlogController {
     }
 
     /**
-     * Récupérer les articles par catégorie
+     * Récupérer les articles par ID de catégorie
      */
-    private function getArticlesByCategory($categorie) {
+    private function getArticlesByCategoryId($id_categorie) {
         try {
             $pdo = $this->blogModel->getPDO();
-            $table = $this->blogModel->getTableName();
+            $query = "SELECT a.*, COALESCE(c.nom, 'Non catégorisé') AS categorie_nom
+                      FROM article a
+                      LEFT JOIN categorie_article c ON a.categorie = c.id_categorie
+                      WHERE a.categorie = :id
+                      ORDER BY a.date_publication DESC";
 
-            $query = "SELECT * FROM {$table} WHERE categorie = :categorie ORDER BY date_publication DESC";
             $stmt = $pdo->prepare($query);
-            $stmt->bindParam(':categorie', $categorie);
+            $stmt->bindParam(':id', $id_categorie, PDO::PARAM_INT);
             $stmt->execute();
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Erreur lors de la récupération des articles par catégorie: " . $e->getMessage());
+            error_log("Erreur dans getArticlesByCategoryId: " . $e->getMessage());
             return [];
         }
     }
 
     /**
-     * Récupérer les derniers articles (pour la page d'accueil)
+     * Récupérer les derniers articles
      */
     private function getRecentArticles($limit = 3) {
         try {
             $pdo = $this->blogModel->getPDO();
-            $table = $this->blogModel->getTableName();
-
-            $query = "SELECT * FROM {$table} ORDER BY date_publication DESC LIMIT :limit";
+            $query = "SELECT a.*, COALESCE(c.nom, 'Non catégorisé') AS categorie_nom
+                      FROM article a
+                      LEFT JOIN categorie_article c ON a.categorie = c.id_categorie
+                      ORDER BY a.date_publication DESC LIMIT :limit";
             $stmt = $pdo->prepare($query);
             $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Erreur lors de la récupération des articles récents: " . $e->getMessage());
@@ -441,20 +537,30 @@ class BlogController {
     // ===== MÉTHODES PRIVÉES =====
 
     /**
+     * Vérifier si une catégorie existe
+     */
+    private function categoryExists($id_categorie) {
+        try {
+            $category = $this->categoryController->getCategoryById($id_categorie);
+            return $category !== false;
+        } catch (Exception $e) {
+            error_log("Erreur lors de la vérification de la catégorie: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Gérer l'upload d'image
      */
     private function uploadImage($file) {
-        // Vérifier les erreurs d'upload
         if ($file['error'] !== UPLOAD_ERR_OK) {
             return ['success' => false, 'message' => 'Erreur lors de l\'upload du fichier'];
         }
 
-        // Vérifier la taille (max 5MB)
         if ($file['size'] > 5 * 1024 * 1024) {
             return ['success' => false, 'message' => 'Le fichier est trop volumineux (max 5MB)'];
         }
 
-        // Vérifier le type MIME
         $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $file['tmp_name']);
@@ -464,12 +570,10 @@ class BlogController {
             return ['success' => false, 'message' => 'Type de fichier non autorisé. Utilisez JPG, PNG, GIF ou WebP'];
         }
 
-        // Générer un nom de fichier unique
         $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
         $filename = uniqid('article_', true) . '.' . $extension;
         $filepath = $this->uploadDir . $filename;
 
-        // Déplacer le fichier uploadé
         if (move_uploaded_file($file['tmp_name'], $filepath)) {
             return [
                 'success' => true,
@@ -487,23 +591,27 @@ class BlogController {
     private function validateArticleData($data) {
         $errors = [];
 
-        if (empty(trim($data['titre']))) {
+        if (empty(trim($data['titre'] ?? ''))) {
             $errors['titre'] = 'Le titre est obligatoire';
+        } elseif (strlen(trim($data['titre'])) < 3) {
+            $errors['titre'] = 'Le titre doit contenir au moins 3 caractères';
         }
 
-        if (empty(trim($data['content']))) {
+        if (empty(trim($data['content'] ?? ''))) {
             $errors['content'] = 'Le contenu est obligatoire';
+        } elseif (strlen(trim($data['content'])) < 10) {
+            $errors['content'] = 'Le contenu doit contenir au moins 10 caractères';
         }
 
-        if (empty(trim($data['categorie']))) {
-            $errors['categorie'] = 'La catégorie est obligatoire';
+        if (empty($data['id_categorie'] ?? '')) {
+            $errors['id_categorie'] = 'La catégorie est obligatoire';
         }
 
         return $errors;
     }
 
     /**
-     * Tronquer le contenu (pour l'aperçu)
+     * Tronquer le contenu
      */
     private function truncateContent($content, $length) {
         if (strlen($content) <= $length) {

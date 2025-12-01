@@ -9,6 +9,28 @@ class CommentController {
     }
 
     /**
+     * Récupérer tous les commentaires (pour le backoffice)
+     * Renvoie un tableau associatif trié par date_commentaire DESC
+     */
+    public function getAllComments() {
+        try {
+            $pdo = $this->commentModel->getPDO();
+            $table = $this->commentModel->getTableName();
+
+            $stmt = $pdo->query("SELECT * FROM {$table} ORDER BY date_commentaire DESC");
+            if (!$stmt) {
+                error_log('CommentController::getAllComments -> échec de la préparation de la requête');
+                return [];
+            }
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Exception $e) {
+            error_log('CommentController::getAllComments error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Récupérer tous les commentaires d'un article (API JSON)
      */
     public function getByArticleJSON($id_article) {
@@ -37,7 +59,7 @@ class CommentController {
             error_log("Erreur dans CommentController::getByArticleJSON: " . $e->getMessage());
             return [
                 'success' => false,
-                'message' => 'Erreur serveur: ' . $e->getMessage(),
+                'message' => 'Erreur serveur',
                 'comments' => []
             ];
         }
@@ -71,7 +93,53 @@ class CommentController {
             }
         } catch (Exception $e) {
             error_log("Erreur dans CommentController::create: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Erreur serveur: ' . $e->getMessage()];
+            return ['success' => false, 'message' => 'Erreur serveur'];
+        }
+    }
+
+    /**
+     * Mettre à jour un commentaire
+     */
+    public function update($id_commentaire, $contenu) {
+        try {
+            if (!$id_commentaire || empty(trim($contenu))) {
+                return ['success' => false, 'message' => 'Données invalides'];
+            }
+
+            $contenu = trim($contenu);
+
+            // Validation du contenu
+            if (strlen($contenu) < 3) {
+                return ['success' => false, 'message' => 'Le commentaire doit contenir au moins 3 caractères'];
+            }
+
+            if (strlen($contenu) > 1000) {
+                return ['success' => false, 'message' => 'Le commentaire ne doit pas dépasser 1000 caractères'];
+            }
+
+            // Vérifier que le commentaire existe
+            $existingComment = $this->getCommentById($id_commentaire);
+            if (!$existingComment) {
+                return ['success' => false, 'message' => 'Commentaire non trouvé'];
+            }
+
+            // Mettre à jour le commentaire
+            $pdo = $this->commentModel->getPDO();
+            $table = $this->commentModel->getTableName();
+            $query = "UPDATE {$table} SET contenu = :contenu WHERE id_commentaire = :id";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':contenu', $contenu);
+            $stmt->bindParam(':id', $id_commentaire, PDO::PARAM_INT);
+
+            if ($stmt->execute()) {
+                return ['success' => true, 'message' => 'Commentaire mis à jour avec succès'];
+            } else {
+                return ['success' => false, 'message' => 'Erreur lors de la mise à jour'];
+            }
+
+        } catch (Exception $e) {
+            error_log("Erreur dans CommentController::update: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Erreur serveur'];
         }
     }
 
@@ -114,8 +182,19 @@ class CommentController {
                      ORDER BY date_commentaire DESC";
 
             $stmt = $pdo->prepare($query);
+
+            if (!$stmt) {
+                error_log("Failed to prepare statement: " . implode(", ", $pdo->errorInfo()));
+                return [];
+            }
+
             $stmt->bindParam(':id_article', $id_article, PDO::PARAM_INT);
-            $stmt->execute();
+            $executed = $stmt->execute();
+
+            if (!$executed) {
+                error_log("Failed to execute query: " . implode(", ", $stmt->errorInfo()));
+                return [];
+            }
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -147,7 +226,7 @@ class CommentController {
     }
 
     /**
-     * Créer un nouveau commentaire
+     * Créer un nouveau commentaire en base de données
      */
     private function createCommentDB($data) {
         try {
@@ -158,12 +237,25 @@ class CommentController {
                      VALUES (:id_article, :nom_visiteur, :contenu, :date_commentaire)";
 
             $stmt = $pdo->prepare($query);
+
+            if (!$stmt) {
+                error_log("Failed to prepare insert statement: " . implode(", ", $pdo->errorInfo()));
+                return false;
+            }
+
             $stmt->bindParam(':id_article', $data['id_article'], PDO::PARAM_INT);
             $stmt->bindParam(':nom_visiteur', $data['nom_visiteur']);
             $stmt->bindParam(':contenu', $data['contenu']);
             $stmt->bindParam(':date_commentaire', $data['date_commentaire']);
 
-            return $stmt->execute();
+            $executed = $stmt->execute();
+
+            if (!$executed) {
+                error_log("Failed to execute insert: " . implode(", ", $stmt->errorInfo()));
+                return false;
+            }
+
+            return $executed;
         } catch (PDOException $e) {
             error_log("Erreur lors de la création du commentaire: " . $e->getMessage());
             return false;
@@ -171,7 +263,7 @@ class CommentController {
     }
 
     /**
-     * Supprimer un commentaire
+     * Supprimer un commentaire en base de données
      */
     private function deleteCommentDB($id_commentaire) {
         try {

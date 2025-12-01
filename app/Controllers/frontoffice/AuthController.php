@@ -161,7 +161,7 @@ class AuthController {
     public function requireAdmin() {
         $this->requireAuth();
         if ($_SESSION['user_role'] !== 'admin') {
-            header('Location: index.html');
+            header('Location: index.php');
             exit;
         }
     }
