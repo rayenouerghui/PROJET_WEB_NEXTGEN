@@ -10,7 +10,6 @@ class CommentController {
 
     /**
      * Récupérer tous les commentaires (pour le backoffice)
-     * Renvoie un tableau associatif trié par date_commentaire DESC
      */
     public function getAllComments() {
         try {
@@ -40,13 +39,29 @@ class CommentController {
             // Transformer les données pour le frontend
             $formattedComments = [];
             foreach ($comments as $comment) {
+                // Récupérer les réponses du commentaire
+                $replies = $this->getRepliesByCommentId($comment['id_commentaire']);
+                $formattedReplies = [];
+                foreach ($replies as $reply) {
+                    $formattedReplies[] = [
+                        'id_commentaire' => $reply['id_commentaire'],
+                        'nom_visiteur' => htmlspecialchars($reply['nom_visiteur']),
+                        'contenu' => htmlspecialchars($reply['contenu']),
+                        'date_commentaire' => $this->formatDate($reply['date_commentaire']),
+                        'likes' => (int)($reply['likes'] ?? 0),
+                        'avatar' => $this->getDefaultAvatar()
+                    ];
+                }
+
                 $formattedComments[] = [
                     'id_commentaire' => $comment['id_commentaire'],
                     'id_article' => $comment['id_article'],
                     'nom_visiteur' => htmlspecialchars($comment['nom_visiteur']),
                     'contenu' => htmlspecialchars($comment['contenu']),
                     'date_commentaire' => $this->formatDate($comment['date_commentaire']),
-                    'avatar' => $this->getDefaultAvatar()
+                    'likes' => (int)($comment['likes'] ?? 0),
+                    'avatar' => $this->getDefaultAvatar(),
+                    'replies' => $formattedReplies
                 ];
             }
 
@@ -66,9 +81,9 @@ class CommentController {
     }
 
     /**
-     * Créer un nouveau commentaire
+     * Créer un nouveau commentaire ou une réponse
      */
-    public function create($id_article, $nom_visiteur, $contenu) {
+    public function create($id_article, $nom_visiteur, $contenu, $id_parent = null) {
         try {
             // Validation des données
             $errors = $this->validateCommentData($nom_visiteur, $contenu);
@@ -81,7 +96,9 @@ class CommentController {
                 'id_article' => (int)$id_article,
                 'nom_visiteur' => trim($nom_visiteur),
                 'contenu' => trim($contenu),
-                'date_commentaire' => date('Y-m-d H:i:s')
+                'date_commentaire' => date('Y-m-d H:i:s'),
+                'likes' => 0,
+                'id_parent' => $id_parent ? (int)$id_parent : null
             ];
 
             $result = $this->createCommentDB($commentData);
@@ -167,10 +184,74 @@ class CommentController {
         }
     }
 
+    /**
+     * Ajouter un like à un commentaire
+     */
+    public function addLike($id_commentaire) {
+        try {
+            if (!$id_commentaire) {
+                return ['success' => false, 'message' => 'ID commentaire invalide'];
+            }
+
+            $existingComment = $this->getCommentById($id_commentaire);
+            if (!$existingComment) {
+                return ['success' => false, 'message' => 'Commentaire non trouvé'];
+            }
+
+            $result = $this->incrementLikesDB($id_commentaire);
+
+            if ($result) {
+                $updatedComment = $this->getCommentById($id_commentaire);
+                return [
+                    'success' => true,
+                    'message' => 'Like ajouté avec succès',
+                    'likes' => (int)($updatedComment['likes'] ?? 0)
+                ];
+            } else {
+                return ['success' => false, 'message' => 'Erreur lors de l\'ajout du like'];
+            }
+        } catch (Exception $e) {
+            error_log("Erreur dans CommentController::addLike: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Erreur serveur'];
+        }
+    }
+
+    /**
+     * Retirer un like d'un commentaire
+     */
+    public function removeLike($id_commentaire) {
+        try {
+            if (!$id_commentaire) {
+                return ['success' => false, 'message' => 'ID commentaire invalide'];
+            }
+
+            $existingComment = $this->getCommentById($id_commentaire);
+            if (!$existingComment) {
+                return ['success' => false, 'message' => 'Commentaire non trouvé'];
+            }
+
+            $result = $this->decrementLikesDB($id_commentaire);
+
+            if ($result) {
+                $updatedComment = $this->getCommentById($id_commentaire);
+                return [
+                    'success' => true,
+                    'message' => 'Like retiré avec succès',
+                    'likes' => (int)($updatedComment['likes'] ?? 0)
+                ];
+            } else {
+                return ['success' => false, 'message' => 'Erreur lors du retrait du like'];
+            }
+        } catch (Exception $e) {
+            error_log("Erreur dans CommentController::removeLike: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Erreur serveur'];
+        }
+    }
+
     // ===== REQUÊTES SQL =====
 
     /**
-     * Récupérer tous les commentaires d'un article
+     * Récupérer tous les commentaires d'un article (sans réponses)
      */
     private function getAllCommentsByArticle($id_article) {
         try {
@@ -178,7 +259,7 @@ class CommentController {
             $table = $this->commentModel->getTableName();
 
             $query = "SELECT * FROM {$table}
-                     WHERE id_article = :id_article
+                     WHERE id_article = :id_article AND id_parent IS NULL
                      ORDER BY date_commentaire DESC";
 
             $stmt = $pdo->prepare($query);
@@ -199,6 +280,29 @@ class CommentController {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Erreur lors de la récupération des commentaires: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Récupérer les réponses d'un commentaire
+     */
+    private function getRepliesByCommentId($id_parent) {
+        try {
+            $pdo = $this->commentModel->getPDO();
+            $table = $this->commentModel->getTableName();
+
+            $query = "SELECT * FROM {$table}
+                     WHERE id_parent = :id_parent
+                     ORDER BY date_commentaire ASC";
+
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':id_parent', $id_parent, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des réponses: " . $e->getMessage());
             return [];
         }
     }
@@ -233,8 +337,8 @@ class CommentController {
             $pdo = $this->commentModel->getPDO();
             $table = $this->commentModel->getTableName();
 
-            $query = "INSERT INTO {$table} (id_article, nom_visiteur, contenu, date_commentaire) 
-                     VALUES (:id_article, :nom_visiteur, :contenu, :date_commentaire)";
+            $query = "INSERT INTO {$table} (id_article, nom_visiteur, contenu, date_commentaire, likes, id_parent) 
+                     VALUES (:id_article, :nom_visiteur, :contenu, :date_commentaire, :likes, :id_parent)";
 
             $stmt = $pdo->prepare($query);
 
@@ -247,6 +351,8 @@ class CommentController {
             $stmt->bindParam(':nom_visiteur', $data['nom_visiteur']);
             $stmt->bindParam(':contenu', $data['contenu']);
             $stmt->bindParam(':date_commentaire', $data['date_commentaire']);
+            $stmt->bindParam(':likes', $data['likes'], PDO::PARAM_INT);
+            $stmt->bindParam(':id_parent', $data['id_parent'], PDO::PARAM_INT);
 
             $executed = $stmt->execute();
 
@@ -263,20 +369,65 @@ class CommentController {
     }
 
     /**
-     * Supprimer un commentaire en base de données
+     * Supprimer un commentaire et ses réponses
      */
     private function deleteCommentDB($id_commentaire) {
         try {
             $pdo = $this->commentModel->getPDO();
             $table = $this->commentModel->getTableName();
 
-            $query = "DELETE FROM {$table} WHERE id_commentaire = :id";
+            // Supprimer les réponses du commentaire
+            $query1 = "DELETE FROM {$table} WHERE id_parent = :id";
+            $stmt1 = $pdo->prepare($query1);
+            $stmt1->bindParam(':id', $id_commentaire, PDO::PARAM_INT);
+            $stmt1->execute();
+
+            // Supprimer le commentaire lui-même
+            $query2 = "DELETE FROM {$table} WHERE id_commentaire = :id";
+            $stmt2 = $pdo->prepare($query2);
+            $stmt2->bindParam(':id', $id_commentaire, PDO::PARAM_INT);
+
+            return $stmt2->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la suppression du commentaire: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Incrémenter le nombre de likes
+     */
+    private function incrementLikesDB($id_commentaire) {
+        try {
+            $pdo = $this->commentModel->getPDO();
+            $table = $this->commentModel->getTableName();
+
+            $query = "UPDATE {$table} SET likes = likes + 1 WHERE id_commentaire = :id";
             $stmt = $pdo->prepare($query);
             $stmt->bindParam(':id', $id_commentaire, PDO::PARAM_INT);
 
             return $stmt->execute();
         } catch (PDOException $e) {
-            error_log("Erreur lors de la suppression du commentaire: " . $e->getMessage());
+            error_log("Erreur lors de l'incrémentation des likes: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Décrémenter le nombre de likes
+     */
+    private function decrementLikesDB($id_commentaire) {
+        try {
+            $pdo = $this->commentModel->getPDO();
+            $table = $this->commentModel->getTableName();
+
+            $query = "UPDATE {$table} SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END WHERE id_commentaire = :id";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':id', $id_commentaire, PDO::PARAM_INT);
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la décrémentation des likes: " . $e->getMessage());
             return false;
         }
     }

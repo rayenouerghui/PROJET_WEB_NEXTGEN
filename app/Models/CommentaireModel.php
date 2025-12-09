@@ -11,6 +11,8 @@ class CommentModel {
     private $nom_visiteur;
     private $contenu;
     private $date_commentaire;
+    private $likes;
+    private $id_parent;
 
     public function __construct() {
         $database = Database::getInstance();
@@ -36,6 +38,14 @@ class CommentModel {
 
     public function getDateCommentaire() {
         return $this->date_commentaire;
+    }
+
+    public function getLikes() {
+        return $this->likes ?? 0;
+    }
+
+    public function getIdParent() {
+        return $this->id_parent;
     }
 
     public function getPDO() {
@@ -72,6 +82,16 @@ class CommentModel {
         return $this;
     }
 
+    public function setLikes($likes) {
+        $this->likes = (int)$likes;
+        return $this;
+    }
+
+    public function setIdParent($id_parent) {
+        $this->id_parent = $id_parent ? (int)$id_parent : null;
+        return $this;
+    }
+
     // ===== MÉTHODE POUR CHARGER LES DONNÉES DANS LES PROPRIÉTÉS =====
     public function loadFromArray($data) {
         if (isset($data['id_commentaire'])) $this->setId($data['id_commentaire']);
@@ -79,6 +99,8 @@ class CommentModel {
         if (isset($data['nom_visiteur'])) $this->setNomVisiteur($data['nom_visiteur']);
         if (isset($data['contenu'])) $this->setContenu($data['contenu']);
         if (isset($data['date_commentaire'])) $this->setDateCommentaire($data['date_commentaire']);
+        if (isset($data['likes'])) $this->setLikes($data['likes']);
+        if (isset($data['id_parent'])) $this->setIdParent($data['id_parent']);
         return $this;
     }
 
@@ -89,7 +111,9 @@ class CommentModel {
             'id_article' => $this->id_article,
             'nom_visiteur' => $this->nom_visiteur,
             'contenu' => $this->contenu,
-            'date_commentaire' => $this->date_commentaire
+            'date_commentaire' => $this->date_commentaire,
+            'likes' => $this->likes ?? 0,
+            'id_parent' => $this->id_parent
         ];
     }
 }

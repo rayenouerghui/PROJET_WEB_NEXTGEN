@@ -2,11 +2,14 @@
 require_once __DIR__ . '/../Models/BlogModel.php';
 require_once __DIR__ . '/../Models/CategoryModel.php';
 require_once __DIR__ . '/CategoryController.php';
+require_once __DIR__ . '/../Models/ArticleRatingModel.php';
+require_once __DIR__ . '/ArticleRatingController.php';
 
 class BlogController {
     private $blogModel;
     private $categoryModel;
     private $categoryController;
+    private $ratingController;
     private $uploadDir = __DIR__ . '/../../public/uploads/articles/';
     private $uploadUrl = '/PROJET_WEB_NEXTGEN/public/uploads/articles/';
 
@@ -14,6 +17,7 @@ class BlogController {
         $this->blogModel = new BlogModel();
         $this->categoryModel = new CategoryModel();
         $this->categoryController = new CategoryController();
+        $this->ratingController = new ArticleRatingController();
 
         if (!file_exists($this->uploadDir)) {
             mkdir($this->uploadDir, 0755, true);
@@ -649,6 +653,63 @@ class BlogController {
         ];
 
         return $images[$categorie] ?? $images['default'];
+    }
+
+/**
+ * Ajouter une notation à un article
+ */
+public function addRating($id_article, $rating) {
+    return $this->ratingController->addRating($id_article, $rating);
+}
+
+/**
+ * Récupérer les stats de notation
+ */
+public function getRatingStats($id_article) {
+    return $this->ratingController->getRatingStats($id_article);
+}
+
+/**
+ * Supprimer la notation d'un utilisateur
+ */
+public function removeRating($id_article) {
+    return $this->ratingController->removeRating($id_article);
+}
+
+/**
+ * Récupérer les articles les mieux notés
+ */
+public function getTopRatedArticles($limit = 5) {
+    return $this->ratingController->getTopRatedArticles($limit);
+}
+
+/**
+ * Enrichir les données d'article avec les stats de rating
+ */
+public function enrichArticleWithRating($article)
+{
+    $ratingStats = $this->ratingController->getRatingStats($article['id_article']);
+
+    if ($ratingStats['success']) {
+        $article['rating_stats'] = $ratingStats['stats'];
+        $article['user_rating'] = $ratingStats['user_rating'];
+    }
+
+    return $article;
+}
+
+
+    /**
+     * Enrichir une liste d'articles avec les stats de rating
+     */
+    public
+    function enrichArticlesWithRating($articles)
+    {
+        foreach ($articles as &$article) {
+            $article = $this->enrichArticleWithRating($article);
+        }
+        return $articles;
+
     }
 }
 ?>

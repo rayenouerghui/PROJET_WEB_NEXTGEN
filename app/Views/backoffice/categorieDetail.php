@@ -32,7 +32,7 @@ $categories = $categoryController->getAllCategories();
                                 <th>#</th>
                                 <th>Nom</th>
                                 <th>Description</th>
-                                <th>Slug</th>
+<!--                                <th>Slug</th>-->
                             </tr>
                             </thead>
                             <tbody>
@@ -44,13 +44,13 @@ $categories = $categoryController->getAllCategories();
                                     $id = htmlspecialchars((string)($c['id_categorie'] ?? ''));
                                     $nom = htmlspecialchars($c['nom'] ?? '');
                                     $desc = htmlspecialchars($c['description'] ?? '');
-                                    $slug = htmlspecialchars($c['slug'] ?? '');
+//                                    $slug = htmlspecialchars($c['slug'] ?? '');
                                     ?>
                                     <tr>
                                         <td><?= $id ?></td>
                                         <td><?= $nom ?></td>
                                         <td class="text-muted" style="max-width:520px;" title="<?= $desc ?>"><?= $desc !== '' ? $desc : '—' ?></td>
-                                        <td><code><?= $slug !== '' ? $slug : '—' ?></code></td>
+<!--                                        <td><code>--><?php //= $slug !== '' ? $slug : '—' ?><!--</code></td>-->
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>

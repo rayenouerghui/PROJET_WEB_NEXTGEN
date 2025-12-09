@@ -32,10 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action'])) {
             exit;
         }
         $data = [
-            'titre' => $_POST['titre'] ?? '',
-            'content' => $_POST['content'] ?? '',
-            'id_categorie' => $_POST['id_categorie'] ?? '',
-            'id_auteur' => $_POST['id_auteur'] ?? 1,
+                'titre' => $_POST['titre'] ?? '',
+                'content' => $_POST['content'] ?? '',
+                'id_categorie' => $_POST['id_categorie'] ?? '',
+                'id_auteur' => $_POST['id_auteur'] ?? 1,
         ];
         $result = $blogController->update($id, $data, $_FILES ?? null);
         echo json_encode($result);
@@ -50,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action'])) {
             exit;
         }
         $data = [
-            'nom' => $_POST['nom'] ?? '',
-            'description' => $_POST['description'] ?? '',
+                'nom' => $_POST['nom'] ?? '',
+                'description' => $_POST['description'] ?? '',
         ];
         $result = $categoryController->update($id, $data);
         echo json_encode($result);
@@ -260,7 +260,7 @@ try {
                             <div class="d-flex align-items-center gap-2 justify-content-between">
                                 <div>
                                     <h5 class="text-muted fs-13 fw-bold text-uppercase">Commentaires</h5>
-                                    <h3 class="my-2 py-1 fw-bold" id="totalComments">0</h3>
+                                    <h3 class="my-2 py-1 fw-bold" id="totalComments"><?php echo count($allComments); ?></h3>
                                     <p class="mb-0 text-muted">
                                         <span class="text-nowrap">Tous les commentaires</span>
                                     </p>
@@ -490,6 +490,7 @@ try {
                                                 <th>Auteur</th>
                                                 <th>Article</th>
                                                 <th>Commentaire</th>
+                                                <th>Likes</th>
                                                 <th>Date</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -500,6 +501,7 @@ try {
                                                 $nom = htmlspecialchars($c['nom_visiteur'] ?? 'Anonyme');
                                                 $contenu = htmlspecialchars($c['contenu'] ?? '');
                                                 $date = htmlspecialchars($c['date_commentaire'] ?? '');
+                                                $likes = (int)($c['likes'] ?? 0);
                                                 $articleId = (int)($c['id_article'] ?? 0);
                                                 $articleTitle = isset($articlesById[$articleId]['titre']) ? htmlspecialchars($articlesById[$articleId]['titre']) : ('Article #'.$articleId);
                                                 $excerpt = (strlen($contenu) > 120) ? (substr($contenu, 0, 120) . '...') : $contenu;
@@ -518,6 +520,12 @@ try {
                                                     </td>
                                                     <td class="text-muted text-truncate" style="max-width: 360px;" title="<?= $contenu ?>">
                                                         <?= $excerpt ?>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <i class="ri-heart-fill text-danger" style="font-size: 16px;"></i>
+                                                            <span class="badge bg-danger-subtle text-danger fw-bold"><?= $likes ?></span>
+                                                        </div>
                                                     </td>
                                                     <td><span class="fs-12 text-muted"><?= $date ?></span></td>
                                                     <td>
@@ -643,475 +651,359 @@ try {
                 </button>
             </div>
         </div>
-    </div>
-    
-</div>
 
-<!-- Add Category Modal -->
-<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addCategoryModalLabel">Ajouter une Nouvelle Catégorie</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addCategoryForm">
-                    <div class="mb-3">
-                        <label class="form-label">Nom de la Catégorie <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="nom" placeholder="Ex: Gaming, VR, Esport...">
-                        <div class="invalid-feedback d-block small" data-error-for="nom"></div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" name="description" rows="3" placeholder="Description de la catégorie (optionnel)"></textarea>
-                        <div class="invalid-feedback d-block small" data-error-for="description"></div>
-                    </div>
-                    <div id="categoryError" class="alert alert-danger d-none"></div>
-                    <div id="categorySuccess" class="alert alert-success d-none"></div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary" onclick="saveCategory()">
-                    <i class="ri-save-line me-1"></i> Enregistrer
-                </button>
-            </div>
-        </div>
     </div>
-</div>
 
-<!-- Edit Article Modal -->
-<div class="modal fade" id="editArticleModal" tabindex="-1" aria-labelledby="editArticleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editArticleModalLabel">Modifier l'Article</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editArticleForm" enctype="multipart/form-data">
-                    <input type="hidden" name="id" id="edit_article_id">
-                    <div class="mb-3">
-                        <label class="form-label">Titre de l'Article <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="titre" id="edit_article_titre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Catégorie <span class="text-danger">*</span></label>
-                        <select class="form-select" name="id_categorie" id="edit_article_categorie" required>
-                            <option value="">Sélectionnez une catégorie</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?php echo $cat['id_categorie']; ?>">
-                                    <?php echo htmlspecialchars($cat['nom']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Contenu <span class="text-danger">*</span></label>
-                        <textarea class="form-control" name="content" id="edit_article_content" rows="6" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Image actuelle</label>
-                        <div class="mb-2">
-                            <img id="editArticleImagePreview" src="" alt="aperçu" style="max-width:240px; display:none;"/>
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCategoryModalLabel">Ajouter une Nouvelle Catégorie</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCategoryForm">
+                        <div class="mb-3">
+                            <label class="form-label">Nom de la Catégorie <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="nom" placeholder="Ex: Gaming, VR, Esport...">
+                            <div class="invalid-feedback d-block small" data-error-for="nom"></div>
                         </div>
-                        <input type="file" class="form-control" name="image" accept="image/*">
-                        <small class="text-muted">Laissez vide pour conserver l'image actuelle.</small>
-                    </div>
-                    <div id="editArticleError" class="alert alert-danger d-none"></div>
-                    <div id="editArticleSuccess" class="alert alert-success d-none"></div>
-                </form>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="Description de la catégorie (optionnel)"></textarea>
+                            <div class="invalid-feedback d-block small" data-error-for="description"></div>
+                        </div>
+                        <div id="categoryError" class="alert alert-danger d-none"></div>
+                        <div id="categorySuccess" class="alert alert-success d-none"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCategory()">
+                        <i class="ri-save-line me-1"></i> Enregistrer
+                    </button>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary" onclick="submitEditArticle()">
-                    <i class="ri-save-line me-1"></i> Enregistrer les modifications
-                </button>
+        </div>
+    </div>
+
+    <!-- Edit Article Modal -->
+    <div class="modal fade" id="editArticleModal" tabindex="-1" aria-labelledby="editArticleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editArticleModalLabel">Modifier l'Article</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editArticleForm" enctype="multipart/form-data">
+                        <input type="hidden" name="id" id="edit_article_id">
+                        <div class="mb-3">
+                            <label class="form-label">Titre de l'Article <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="titre" id="edit_article_titre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Catégorie <span class="text-danger">*</span></label>
+                            <select class="form-select" name="id_categorie" id="edit_article_categorie" required>
+                                <option value="">Sélectionnez une catégorie</option>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?php echo $cat['id_categorie']; ?>">
+                                        <?php echo htmlspecialchars($cat['nom']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contenu <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="content" id="edit_article_content" rows="6" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Image actuelle</label>
+                            <div class="mb-2">
+                                <img id="editArticleImagePreview" src="" alt="aperçu" style="max-width:240px; display:none;"/>
+                            </div>
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="text-muted">Laissez vide pour conserver l'image actuelle.</small>
+                        </div>
+                        <div id="editArticleError" class="alert alert-danger d-none"></div>
+                        <div id="editArticleSuccess" class="alert alert-success d-none"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="submitEditArticle()">
+                        <i class="ri-save-line me-1"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModalLabel">Modifier la Catégorie</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCategoryForm">
+                        <input type="hidden" name="id" id="edit_category_id">
+                        <div class="mb-3">
+                            <label class="form-label">Nom de la Catégorie <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="nom" id="edit_category_nom" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" id="edit_category_description" rows="3"></textarea>
+                        </div>
+                        <div id="editCategoryError" class="alert alert-danger d-none"></div>
+                        <div id="editCategorySuccess" class="alert alert-success d-none"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="submitEditCategory()">
+                        <i class="ri-save-line me-1"></i> Enregistrer
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-</div>
+    <?php include('partials/customizer.php'); ?>
+    <?php include('partials/footer-scripts.php'); ?>
 
-<!-- Edit Category Modal -->
-<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editCategoryModalLabel">Modifier la Catégorie</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editCategoryForm">
-                    <input type="hidden" name="id" id="edit_category_id">
-                    <div class="mb-3">
-                        <label class="form-label">Nom de la Catégorie <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="nom" id="edit_category_nom" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" name="description" id="edit_category_description" rows="3"></textarea>
-                    </div>
-                    <div id="editCategoryError" class="alert alert-danger d-none"></div>
-                    <div id="editCategorySuccess" class="alert alert-success d-none"></div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary" onclick="submitEditCategory()">
-                    <i class="ri-save-line me-1"></i> Enregistrer
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+    <!-- ApexCharts -->
+    <script src="../../../public/assets/vendor/apexcharts/apexcharts.min.js"></script>
 
-<?php include('partials/customizer.php'); ?>
-<?php include('partials/footer-scripts.php'); ?>
+    <script>
+        // Open modals manually - works even if Bootstrap isn't fully loaded
+        function openArticleModal() {
+            const modalEl = document.getElementById('addArticleModal');
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.setAttribute('aria-modal', 'true');
+            modalEl.setAttribute('role', 'dialog');
+            modalEl.removeAttribute('aria-hidden');
 
-<!-- ApexCharts -->
-<script src="../../../public/assets/vendor/apexcharts/apexcharts.min.js"></script>
-
-<script>
-    // Open modals manually - works even if Bootstrap isn't fully loaded
-    function openArticleModal() {
-        const modalEl = document.getElementById('addArticleModal');
-        modalEl.classList.add('show');
-        modalEl.style.display = 'block';
-        modalEl.setAttribute('aria-modal', 'true');
-        modalEl.setAttribute('role', 'dialog');
-        modalEl.removeAttribute('aria-hidden');
-
-        // Add backdrop
-        const backdrop = document.createElement('div');
-        backdrop.className = 'modal-backdrop fade show';
-        backdrop.id = 'articleModalBackdrop';
-        document.body.appendChild(backdrop);
-        document.body.classList.add('modal-open');
-    }
-
-    function openEditArticleModal() {
-        const modalEl = document.getElementById('editArticleModal');
-        modalEl.classList.add('show');
-        modalEl.style.display = 'block';
-        modalEl.setAttribute('aria-modal', 'true');
-        modalEl.setAttribute('role', 'dialog');
-        modalEl.removeAttribute('aria-hidden');
-
-        const backdrop = document.createElement('div');
-        backdrop.className = 'modal-backdrop fade show';
-        backdrop.id = 'editArticleModalBackdrop';
-        document.body.appendChild(backdrop);
-        document.body.classList.add('modal-open');
-    }
-
-    function openCategoryModal() {
-        const modalEl = document.getElementById('addCategoryModal');
-        modalEl.classList.add('show');
-        modalEl.style.display = 'block';
-        modalEl.setAttribute('aria-modal', 'true');
-        modalEl.setAttribute('role', 'dialog');
-        modalEl.removeAttribute('aria-hidden');
-
-        // Add backdrop
-        const backdrop = document.createElement('div');
-        backdrop.className = 'modal-backdrop fade show';
-        backdrop.id = 'categoryModalBackdrop';
-        document.body.appendChild(backdrop);
-        document.body.classList.add('modal-open');
-    }
-
-    function openEditCategoryModal() {
-        const modalEl = document.getElementById('editCategoryModal');
-        modalEl.classList.add('show');
-        modalEl.style.display = 'block';
-        modalEl.setAttribute('aria-modal', 'true');
-        modalEl.setAttribute('role', 'dialog');
-        modalEl.removeAttribute('aria-hidden');
-
-        const backdrop = document.createElement('div');
-        backdrop.className = 'modal-backdrop fade show';
-        backdrop.id = 'editCategoryModalBackdrop';
-        document.body.appendChild(backdrop);
-        document.body.classList.add('modal-open');
-    }
-
-    // Open Edit Comment modal
-    function openEditCommentModal() {
-        const modalEl = document.getElementById('editCommentModal');
-        modalEl.classList.add('show');
-        modalEl.style.display = 'block';
-        modalEl.setAttribute('aria-modal', 'true');
-        modalEl.setAttribute('role', 'dialog');
-        modalEl.removeAttribute('aria-hidden');
-
-        const backdrop = document.createElement('div');
-        backdrop.className = 'modal-backdrop fade show';
-        backdrop.id = 'editCommentModalBackdrop';
-        document.body.appendChild(backdrop);
-        document.body.classList.add('modal-open');
-    }
-
-    // Close modal function
-    function closeModal(modalId, backdropId) {
-        const modalEl = document.getElementById(modalId);
-        modalEl.classList.remove('show');
-        modalEl.style.display = 'none';
-        modalEl.setAttribute('aria-hidden', 'true');
-        modalEl.removeAttribute('aria-modal');
-        modalEl.removeAttribute('role');
-
-        const backdrop = document.getElementById(backdropId);
-        if (backdrop) {
-            backdrop.remove();
+            // Add backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.id = 'articleModalBackdrop';
+            document.body.appendChild(backdrop);
+            document.body.classList.add('modal-open');
         }
-        document.body.classList.remove('modal-open');
-    }
 
-    // Add event listeners to close buttons
-    document.addEventListener('DOMContentLoaded', function() {
-        // Article modal close buttons
-        const articleCloseButtons = document.querySelectorAll('#addArticleModal [data-bs-dismiss="modal"]');
-        articleCloseButtons.forEach(btn => {
-            btn.addEventListener('click', () => closeModal('addArticleModal', 'articleModalBackdrop'));
-        });
+        function openEditArticleModal() {
+            const modalEl = document.getElementById('editArticleModal');
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.setAttribute('aria-modal', 'true');
+            modalEl.setAttribute('role', 'dialog');
+            modalEl.removeAttribute('aria-hidden');
 
-        // Edit Article modal close buttons
-        const editArticleCloseButtons = document.querySelectorAll('#editArticleModal [data-bs-dismiss="modal"]');
-        editArticleCloseButtons.forEach(btn => {
-            btn.addEventListener('click', () => closeModal('editArticleModal', 'editArticleModalBackdrop'));
-        });
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.id = 'editArticleModalBackdrop';
+            document.body.appendChild(backdrop);
+            document.body.classList.add('modal-open');
+        }
 
-        // Category modal close buttons
-        const categoryCloseButtons = document.querySelectorAll('#addCategoryModal [data-bs-dismiss="modal"]');
-        categoryCloseButtons.forEach(btn => {
-            btn.addEventListener('click', () => closeModal('addCategoryModal', 'categoryModalBackdrop'));
-        });
+        function openCategoryModal() {
+            const modalEl = document.getElementById('addCategoryModal');
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.setAttribute('aria-modal', 'true');
+            modalEl.setAttribute('role', 'dialog');
+            modalEl.removeAttribute('aria-hidden');
 
-        // Edit Category modal close buttons
-        const editCategoryCloseButtons = document.querySelectorAll('#editCategoryModal [data-bs-dismiss="modal"]');
-        editCategoryCloseButtons.forEach(btn => {
-            btn.addEventListener('click', () => closeModal('editCategoryModal', 'editCategoryModalBackdrop'));
-        });
+            // Add backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.id = 'categoryModalBackdrop';
+            document.body.appendChild(backdrop);
+            document.body.classList.add('modal-open');
+        }
 
-        // Edit Comment modal close buttons
-        const editCommentCloseButtons = document.querySelectorAll('#editCommentModal [data-bs-dismiss="modal"]');
-        editCommentCloseButtons.forEach(btn => {
-            btn.addEventListener('click', () => closeModal('editCommentModal', 'editCommentModalBackdrop'));
-        });
+        function openEditCategoryModal() {
+            const modalEl = document.getElementById('editCategoryModal');
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.setAttribute('aria-modal', 'true');
+            modalEl.setAttribute('role', 'dialog');
+            modalEl.removeAttribute('aria-hidden');
 
-        // Close on backdrop click
-        document.addEventListener('click', function(e) {
-            if (e.target.id === 'articleModalBackdrop') {
-                closeModal('addArticleModal', 'articleModalBackdrop');
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.id = 'editCategoryModalBackdrop';
+            document.body.appendChild(backdrop);
+            document.body.classList.add('modal-open');
+        }
+
+        // Open Edit Comment modal
+        function openEditCommentModal() {
+            const modalEl = document.getElementById('editCommentModal');
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.setAttribute('aria-modal', 'true');
+            modalEl.setAttribute('role', 'dialog');
+            modalEl.removeAttribute('aria-hidden');
+
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.id = 'editCommentModalBackdrop';
+            document.body.appendChild(backdrop);
+            document.body.classList.add('modal-open');
+        }
+
+        // Close modal function
+        function closeModal(modalId, backdropId) {
+            const modalEl = document.getElementById(modalId);
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            modalEl.setAttribute('aria-hidden', 'true');
+            modalEl.removeAttribute('aria-modal');
+            modalEl.removeAttribute('role');
+
+            const backdrop = document.getElementById(backdropId);
+            if (backdrop) {
+                backdrop.remove();
             }
-            if (e.target.id === 'editArticleModalBackdrop') {
-                closeModal('editArticleModal', 'editArticleModalBackdrop');
-            }
-            if (e.target.id === 'categoryModalBackdrop') {
-                closeModal('addCategoryModal', 'categoryModalBackdrop');
-            }
-            if (e.target.id === 'editCategoryModalBackdrop') {
-                closeModal('editCategoryModal', 'editCategoryModalBackdrop');
-            }
-            if (e.target.id === 'editCommentModalBackdrop') {
-                closeModal('editCommentModal', 'editCommentModalBackdrop');
-            }
-        });
-    });
+            document.body.classList.remove('modal-open');
+        }
 
-    // Chart Data
-    const categoryData = <?php echo json_encode(array_map(function($cat) use ($articles) {
-        return [
-                'name' => $cat['nom'],
-                'count' => count(array_filter($articles, function($art) use ($cat) {
-                    return $art['categorie'] == $cat['nom'];
-                }))
-        ];
-    }, $categories)); ?>;
-
-    // Category Distribution Chart
-    if (document.querySelector("#category-chart")) {
-        const categoryChart = new ApexCharts(document.querySelector("#category-chart"), {
-            chart: {
-                type: 'donut',
-                height: 350
-            },
-            series: categoryData.map(c => c.count),
-            labels: categoryData.map(c => c.name),
-            colors: ['#6B5BFF', '#00B8A9', '#FF7A5A', '#3A86FF', '#F8AB37'],
-            legend: {
-                position: 'bottom'
-            },
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '65%'
-                    }
-                }
-            }
-        });
-        categoryChart.render();
-    }
-
-    // Activity Chart
-    if (document.querySelector("#activity-chart")) {
-        const activityChart = new ApexCharts(document.querySelector("#activity-chart"), {
-            chart: {
-                type: 'bar',
-                height: 350
-            },
-            series: [{
-                name: 'Articles',
-                data: categoryData.map(c => c.count)
-            }],
-            xaxis: {
-                categories: categoryData.map(c => c.name)
-            },
-            colors: ['#0acf97'],
-            plotOptions: {
-                bar: {
-                    borderRadius: 4,
-                    horizontal: false
-                }
-            }
-        });
-        activityChart.render();
-    }
-
-    // Save new article
-    function saveArticle() {
-        const form = document.getElementById('addArticleForm');
-        const formData = new FormData(form);
-        const errorDiv = document.getElementById('articleError');
-        const successDiv = document.getElementById('articleSuccess');
-        clearFieldErrors(form);
-
-        // Hide previous messages
-        errorDiv.classList.add('d-none');
-        successDiv.classList.add('d-none');
-
-        // Add action identifier
-        formData.append('ajax_action', 'create_article');
-        formData.append('id_auteur', 1);
-
-        // Send AJAX request to the same page
-        fetch(window.location.href, {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    successDiv.textContent = 'Article créé avec succès !';
-                    successDiv.classList.remove('d-none');
-                    form.reset();
-
-                    setTimeout(() => {
-                        closeModal('addArticleModal', 'articleModalBackdrop');
-                        location.reload();
-                    }, 1500);
-                } else {
-                    if (data.errors) {
-                        showFieldErrors(form, data.errors);
-                    }
-                    if (data.message) {
-                        errorDiv.textContent = data.message;
-                        errorDiv.classList.remove('d-none');
-                    } else if (!data.errors) {
-                        errorDiv.textContent = 'Erreur lors de la création de l\'article.';
-                        errorDiv.classList.remove('d-none');
-                    }
-                }
-            })
-            .catch(error => {
-                errorDiv.textContent = 'Erreur de connexion au serveur.';
-                errorDiv.classList.remove('d-none');
-                console.error('Error:', error);
+        // Add event listeners to close buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Article modal close buttons
+            const articleCloseButtons = document.querySelectorAll('#addArticleModal [data-bs-dismiss="modal"]');
+            articleCloseButtons.forEach(btn => {
+                btn.addEventListener('click', () => closeModal('addArticleModal', 'articleModalBackdrop'));
             });
-    }
 
-    // Save category
-    function saveCategory() {
-        const form = document.getElementById('addCategoryForm');
-        const formData = new FormData(form);
-        const errorDiv = document.getElementById('categoryError');
-        const successDiv = document.getElementById('categorySuccess');
-        clearFieldErrors(form);
+            // Edit Article modal close buttons
+            const editArticleCloseButtons = document.querySelectorAll('#editArticleModal [data-bs-dismiss="modal"]');
+            editArticleCloseButtons.forEach(btn => {
+                btn.addEventListener('click', () => closeModal('editArticleModal', 'editArticleModalBackdrop'));
+            });
 
-        // Hide previous messages
-        errorDiv.classList.add('d-none');
-        successDiv.classList.add('d-none');
+            // Category modal close buttons
+            const categoryCloseButtons = document.querySelectorAll('#addCategoryModal [data-bs-dismiss="modal"]');
+            categoryCloseButtons.forEach(btn => {
+                btn.addEventListener('click', () => closeModal('addCategoryModal', 'categoryModalBackdrop'));
+            });
 
-        // Add action identifier
-        formData.append('ajax_action', 'create_category');
+            // Edit Category modal close buttons
+            const editCategoryCloseButtons = document.querySelectorAll('#editCategoryModal [data-bs-dismiss="modal"]');
+            editCategoryCloseButtons.forEach(btn => {
+                btn.addEventListener('click', () => closeModal('editCategoryModal', 'editCategoryModalBackdrop'));
+            });
 
-        // Send AJAX request to the same page
-        fetch(window.location.href, {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    successDiv.textContent = 'Catégorie créée avec succès !';
-                    successDiv.classList.remove('d-none');
-                    form.reset();
+            // Edit Comment modal close buttons
+            const editCommentCloseButtons = document.querySelectorAll('#editCommentModal [data-bs-dismiss="modal"]');
+            editCommentCloseButtons.forEach(btn => {
+                btn.addEventListener('click', () => closeModal('editCommentModal', 'editCommentModalBackdrop'));
+            });
 
-                    setTimeout(() => {
-                        closeModal('addCategoryModal', 'categoryModalBackdrop');
-                        location.reload();
-                    }, 1500);
-                } else {
-                    if (data.errors) {
-                        showFieldErrors(form, data.errors);
-                    }
-                    if (data.message) {
-                        errorDiv.textContent = data.message;
-                        errorDiv.classList.remove('d-none');
-                    } else if (!data.errors) {
-                        errorDiv.textContent = 'Erreur lors de la création de la catégorie.';
-                        errorDiv.classList.remove('d-none');
+            // Close on backdrop click
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'articleModalBackdrop') {
+                    closeModal('addArticleModal', 'articleModalBackdrop');
+                }
+                if (e.target.id === 'editArticleModalBackdrop') {
+                    closeModal('editArticleModal', 'editArticleModalBackdrop');
+                }
+                if (e.target.id === 'categoryModalBackdrop') {
+                    closeModal('addCategoryModal', 'categoryModalBackdrop');
+                }
+                if (e.target.id === 'editCategoryModalBackdrop') {
+                    closeModal('editCategoryModal', 'editCategoryModalBackdrop');
+                }
+                if (e.target.id === 'editCommentModalBackdrop') {
+                    closeModal('editCommentModal', 'editCommentModalBackdrop');
+                }
+            });
+        });
+
+        // Chart Data
+        const categoryData = <?php echo json_encode(array_map(function($cat) use ($articles) {
+            return [
+                    'name' => $cat['nom'],
+                    'count' => count(array_filter($articles, function($art) use ($cat) {
+                        return $art['categorie'] == $cat['nom'];
+                    }))
+            ];
+        }, $categories)); ?>;
+
+        // Category Distribution Chart
+        if (document.querySelector("#category-chart")) {
+            const categoryChart = new ApexCharts(document.querySelector("#category-chart"), {
+                chart: {
+                    type: 'donut',
+                    height: 350
+                },
+                series: categoryData.map(c => c.count),
+                labels: categoryData.map(c => c.name),
+                colors: ['#6B5BFF', '#00B8A9', '#FF7A5A', '#3A86FF', '#F8AB37'],
+                legend: {
+                    position: 'bottom'
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '65%'
+                        }
                     }
                 }
-            })
-            .catch(error => {
-                errorDiv.textContent = 'Erreur de connexion au serveur.';
-                errorDiv.classList.remove('d-none');
-                console.error('Error:', error);
             });
-    }
+            categoryChart.render();
+        }
 
-    // Helpers: field error handling
-    function clearFieldErrors(form) {
-        // Remove is-invalid from inputs/selects/textareas
-        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-        // Clear inline error messages
-        form.querySelectorAll('[data-error-for]').forEach(el => el.textContent = '');
-    }
+        // Activity Chart
+        if (document.querySelector("#activity-chart")) {
+            const activityChart = new ApexCharts(document.querySelector("#activity-chart"), {
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                series: [{
+                    name: 'Articles',
+                    data: categoryData.map(c => c.count)
+                }],
+                xaxis: {
+                    categories: categoryData.map(c => c.name)
+                },
+                colors: ['#0acf97'],
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: false
+                    }
+                }
+            });
+            activityChart.render();
+        }
 
-    function showFieldErrors(form, errors) {
-        Object.keys(errors).forEach(key => {
-            const msg = errors[key];
-            const errEl = form.querySelector('[data-error-for="' + key + '"]');
-            if (errEl) {
-                errEl.textContent = msg;
-            }
-            const inputEl = form.querySelector('[name="' + key + '"]');
-            if (inputEl) {
-                inputEl.classList.add('is-invalid');
-            }
-        });
-    }
+        // Save new article
+        function saveArticle() {
+            const form = document.getElementById('addArticleForm');
+            const formData = new FormData(form);
+            const errorDiv = document.getElementById('articleError');
+            const successDiv = document.getElementById('articleSuccess');
+            clearFieldErrors(form);
 
-    // Delete article
-    function deleteArticle(id) {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
-            const formData = new FormData();
-            formData.append('ajax_action', 'delete_article');
-            formData.append('id', id);
+            // Hide previous messages
+            errorDiv.classList.add('d-none');
+            successDiv.classList.add('d-none');
 
+            // Add action identifier
+            formData.append('ajax_action', 'create_article');
+            formData.append('id_auteur', 1);
+
+            // Send AJAX request to the same page
             fetch(window.location.href, {
                 method: 'POST',
                 body: formData
@@ -1119,26 +1011,50 @@ try {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Article supprimé avec succès !');
-                        location.reload();
+                        successDiv.textContent = 'Article créé avec succès !';
+                        successDiv.classList.remove('d-none');
+                        form.reset();
+
+                        setTimeout(() => {
+                            closeModal('addArticleModal', 'articleModalBackdrop');
+                            location.reload();
+                        }, 1500);
                     } else {
-                        alert(data.message || 'Erreur lors de la suppression de l\'article.');
+                        if (data.errors) {
+                            showFieldErrors(form, data.errors);
+                        }
+                        if (data.message) {
+                            errorDiv.textContent = data.message;
+                            errorDiv.classList.remove('d-none');
+                        } else if (!data.errors) {
+                            errorDiv.textContent = 'Erreur lors de la création de l\'article.';
+                            errorDiv.classList.remove('d-none');
+                        }
                     }
                 })
                 .catch(error => {
-                    alert('Erreur de connexion au serveur.');
+                    errorDiv.textContent = 'Erreur de connexion au serveur.';
+                    errorDiv.classList.remove('d-none');
                     console.error('Error:', error);
                 });
         }
-    }
 
-    // Delete category
-    function deleteCategory(id) {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-            const formData = new FormData();
-            formData.append('ajax_action', 'delete_category');
-            formData.append('id', id);
+        // Save category
+        function saveCategory() {
+            const form = document.getElementById('addCategoryForm');
+            const formData = new FormData(form);
+            const errorDiv = document.getElementById('categoryError');
+            const successDiv = document.getElementById('categorySuccess');
+            clearFieldErrors(form);
 
+            // Hide previous messages
+            errorDiv.classList.add('d-none');
+            successDiv.classList.add('d-none');
+
+            // Add action identifier
+            formData.append('ajax_action', 'create_category');
+
+            // Send AJAX request to the same page
             fetch(window.location.href, {
                 method: 'POST',
                 body: formData
@@ -1146,237 +1062,328 @@ try {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Catégorie supprimée avec succès !');
-                        location.reload();
+                        successDiv.textContent = 'Catégorie créée avec succès !';
+                        successDiv.classList.remove('d-none');
+                        form.reset();
+
+                        setTimeout(() => {
+                            closeModal('addCategoryModal', 'categoryModalBackdrop');
+                            location.reload();
+                        }, 1500);
                     } else {
-                        alert(data.message || 'Erreur lors de la suppression de la catégorie.');
+                        if (data.errors) {
+                            showFieldErrors(form, data.errors);
+                        }
+                        if (data.message) {
+                            errorDiv.textContent = data.message;
+                            errorDiv.classList.remove('d-none');
+                        } else if (!data.errors) {
+                            errorDiv.textContent = 'Erreur lors de la création de la catégorie.';
+                            errorDiv.classList.remove('d-none');
+                        }
                     }
                 })
                 .catch(error => {
-                    alert('Erreur de connexion au serveur.');
+                    errorDiv.textContent = 'Erreur de connexion au serveur.';
+                    errorDiv.classList.remove('d-none');
                     console.error('Error:', error);
                 });
         }
-    }
 
-    // Delete comment
-    function deleteComment(id) {
-        if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
-            const formData = new FormData();
-            formData.append('ajax_action', 'delete_comment');
-            formData.append('id', id);
-
-            fetch(window.location.href, {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Commentaire supprimé avec succès !');
-                        location.reload();
-                    } else {
-                        alert(data.message || 'Erreur lors de la suppression du commentaire.');
-                    }
-                })
-                .catch(error => {
-                    alert('Erreur de connexion au serveur.');
-                    console.error('Error:', error);
-                });
+        // Helpers: field error handling
+        function clearFieldErrors(form) {
+            // Remove is-invalid from inputs/selects/textareas
+            form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            // Clear inline error messages
+            form.querySelectorAll('[data-error-for]').forEach(el => el.textContent = '');
         }
-    }
 
-    // Edit comment: fetch and open modal
-    function editComment(id) {
-        const url = window.location.pathname + `?ajax_get=comment&id=${id}`;
-        fetch(url)
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success || !data.comment) {
-                    alert(data.message || 'Impossible de charger le commentaire');
-                    return;
+        function showFieldErrors(form, errors) {
+            Object.keys(errors).forEach(key => {
+                const msg = errors[key];
+                const errEl = form.querySelector('[data-error-for="' + key + '"]');
+                if (errEl) {
+                    errEl.textContent = msg;
                 }
-                const c = data.comment;
-                document.getElementById('edit_comment_id').value = c.id_commentaire;
-                document.getElementById('edit_comment_contenu').value = c.contenu || '';
-                document.getElementById('editCommentError').classList.add('d-none');
-                document.getElementById('editCommentSuccess').classList.add('d-none');
-                const form = document.getElementById('editCommentForm');
-                clearFieldErrors(form);
-                openEditCommentModal();
-            })
-            .catch(() => alert('Erreur de connexion au serveur.'));
-    }
-
-    // Save edited comment
-    function saveEditedComment() {
-        const form = document.getElementById('editCommentForm');
-        const formData = new FormData(form);
-        const errorDiv = document.getElementById('editCommentError');
-        const successDiv = document.getElementById('editCommentSuccess');
-        clearFieldErrors(form);
-
-        errorDiv.classList.add('d-none');
-        successDiv.classList.add('d-none');
-
-        formData.append('ajax_action', 'update_comment');
-
-        fetch(window.location.href, { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    successDiv.textContent = 'Commentaire mis à jour avec succès !';
-                    successDiv.classList.remove('d-none');
-                    setTimeout(() => {
-                        closeModal('editCommentModal', 'editCommentModalBackdrop');
-                        location.reload();
-                    }, 1200);
-                } else {
-                    // Map server validation to field error if provided
-                    if (data.errors) {
-                        showFieldErrors(form, data.errors);
-                    } else if (data.message) {
-                        // Fallback: show message under content field or as alert
-                        const errEl = form.querySelector('[data-error-for="contenu"]');
-                        if (errEl) errEl.textContent = data.message;
-                    }
-                    if (data.message && !data.errors) {
-                        errorDiv.textContent = data.message;
-                        errorDiv.classList.remove('d-none');
-                    }
+                const inputEl = form.querySelector('[name="' + key + '"]');
+                if (inputEl) {
+                    inputEl.classList.add('is-invalid');
                 }
-            })
-            .catch(err => {
-                errorDiv.textContent = 'Erreur de connexion au serveur.';
-                errorDiv.classList.remove('d-none');
-                console.error('Error:', err);
             });
-    }
-
-    // Edit category
-    function editCategory(id) {
-        const url = window.location.pathname + `?ajax_get=category&id=${id}`;
-        fetch(url)
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success || !data.category) {
-                    alert(data.message || 'Impossible de charger la catégorie');
-                    return;
-                }
-                const c = data.category;
-                document.getElementById('edit_category_id').value = c.id_categorie;
-                document.getElementById('edit_category_nom').value = c.nom || '';
-                document.getElementById('edit_category_description').value = c.description || '';
-                document.getElementById('editCategoryError').classList.add('d-none');
-                document.getElementById('editCategorySuccess').classList.add('d-none');
-                openEditCategoryModal();
-            })
-            .catch(() => alert('Erreur de connexion au serveur.'));
-    }
-
-    // Edit article
-    function editArticle(id) {
-        const url = window.location.pathname + `?ajax_get=article&id=${id}`;
-        fetch(url)
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success || !data.article) {
-                    alert(data.message || "Impossible de charger l'article");
-                    return;
-                }
-                const a = data.article;
-                document.getElementById('edit_article_id').value = a.id_article;
-                document.getElementById('edit_article_titre').value = a.titre || '';
-                document.getElementById('edit_article_content').value = (a.full_content || a.content || '');
-                const select = document.getElementById('edit_article_categorie');
-                if (a.id_categorie) {
-                    select.value = a.id_categorie;
-                } else if (a.categorie) {
-                    // fallback: some payloads expose category id under `categorie`
-                    select.value = a.categorie;
-                }
-                const img = document.getElementById('editArticleImagePreview');
-                if (a.image) {
-                    img.src = a.image;
-                    img.style.display = 'inline-block';
-                } else {
-                    img.removeAttribute('src');
-                    img.style.display = 'none';
-                }
-                document.getElementById('editArticleError').classList.add('d-none');
-                document.getElementById('editArticleSuccess').classList.add('d-none');
-                openEditArticleModal();
-            })
-            .catch(() => alert('Erreur de connexion au serveur.'));
-    }
-
-    function submitEditArticle() {
-        const form = document.getElementById('editArticleForm');
-        const formData = new FormData(form);
-        const err = document.getElementById('editArticleError');
-        const ok = document.getElementById('editArticleSuccess');
-        err.classList.add('d-none');
-        ok.classList.add('d-none');
-
-        if (!formData.get('titre') || !formData.get('content') || !formData.get('id_categorie')) {
-            err.textContent = 'Veuillez remplir tous les champs obligatoires.';
-            err.classList.remove('d-none');
-            return;
         }
 
-        formData.append('ajax_action', 'update_article');
+        // Delete article
+        function deleteArticle(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+                const formData = new FormData();
+                formData.append('ajax_action', 'delete_article');
+                formData.append('id', id);
 
-        fetch(window.location.href, { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    ok.textContent = 'Article mis à jour avec succès !';
-                    ok.classList.remove('d-none');
-                    setTimeout(() => { closeModal('editArticleModal', 'editArticleModalBackdrop'); location.reload(); }, 1000);
-                } else {
-                    err.textContent = data.message || 'Erreur lors de la mise à jour de l\'article.';
-                    err.classList.remove('d-none');
-                }
-            })
-            .catch(() => {
-                err.textContent = 'Erreur de connexion au serveur.';
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Article supprimé avec succès !');
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Erreur lors de la suppression de l\'article.');
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erreur de connexion au serveur.');
+                        console.error('Error:', error);
+                    });
+            }
+        }
+
+        // Delete category
+        function deleteCategory(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
+                const formData = new FormData();
+                formData.append('ajax_action', 'delete_category');
+                formData.append('id', id);
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Catégorie supprimée avec succès !');
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Erreur lors de la suppression de la catégorie.');
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erreur de connexion au serveur.');
+                        console.error('Error:', error);
+                    });
+            }
+        }
+
+        // Delete comment
+        function deleteComment(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
+                const formData = new FormData();
+                formData.append('ajax_action', 'delete_comment');
+                formData.append('id', id);
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Commentaire supprimé avec succès !');
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Erreur lors de la suppression du commentaire.');
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erreur de connexion au serveur.');
+                        console.error('Error:', error);
+                    });
+            }
+        }
+
+        // Edit comment: fetch and open modal
+        function editComment(id) {
+            const url = window.location.pathname + `?ajax_get=comment&id=${id}`;
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success || !data.comment) {
+                        alert(data.message || 'Impossible de charger le commentaire');
+                        return;
+                    }
+                    const c = data.comment;
+                    document.getElementById('edit_comment_id').value = c.id_commentaire;
+                    document.getElementById('edit_comment_contenu').value = c.contenu || '';
+                    document.getElementById('editCommentError').classList.add('d-none');
+                    document.getElementById('editCommentSuccess').classList.add('d-none');
+                    const form = document.getElementById('editCommentForm');
+                    clearFieldErrors(form);
+                    openEditCommentModal();
+                })
+                .catch(() => alert('Erreur de connexion au serveur.'));
+        }
+
+        // Save edited comment
+        function saveEditedComment() {
+            const form = document.getElementById('editCommentForm');
+            const formData = new FormData(form);
+            const errorDiv = document.getElementById('editCommentError');
+            const successDiv = document.getElementById('editCommentSuccess');
+            clearFieldErrors(form);
+
+            errorDiv.classList.add('d-none');
+            successDiv.classList.add('d-none');
+
+            formData.append('ajax_action', 'update_comment');
+
+            fetch(window.location.href, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        successDiv.textContent = 'Commentaire mis à jour avec succès !';
+                        successDiv.classList.remove('d-none');
+                        setTimeout(() => {
+                            closeModal('editCommentModal', 'editCommentModalBackdrop');
+                            location.reload();
+                        }, 1200);
+                    } else {
+                        // Map server validation to field error if provided
+                        if (data.errors) {
+                            showFieldErrors(form, data.errors);
+                        } else if (data.message) {
+                            // Fallback: show message under content field or as alert
+                            const errEl = form.querySelector('[data-error-for="contenu"]');
+                            if (errEl) errEl.textContent = data.message;
+                        }
+                        if (data.message && !data.errors) {
+                            errorDiv.textContent = data.message;
+                            errorDiv.classList.remove('d-none');
+                        }
+                    }
+                })
+                .catch(err => {
+                    errorDiv.textContent = 'Erreur de connexion au serveur.';
+                    errorDiv.classList.remove('d-none');
+                    console.error('Error:', err);
+                });
+        }
+
+        // Edit category
+        function editCategory(id) {
+            const url = window.location.pathname + `?ajax_get=category&id=${id}`;
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success || !data.category) {
+                        alert(data.message || 'Impossible de charger la catégorie');
+                        return;
+                    }
+                    const c = data.category;
+                    document.getElementById('edit_category_id').value = c.id_categorie;
+                    document.getElementById('edit_category_nom').value = c.nom || '';
+                    document.getElementById('edit_category_description').value = c.description || '';
+                    document.getElementById('editCategoryError').classList.add('d-none');
+                    document.getElementById('editCategorySuccess').classList.add('d-none');
+                    openEditCategoryModal();
+                })
+                .catch(() => alert('Erreur de connexion au serveur.'));
+        }
+
+        // Edit article
+        function editArticle(id) {
+            const url = window.location.pathname + `?ajax_get=article&id=${id}`;
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success || !data.article) {
+                        alert(data.message || "Impossible de charger l'article");
+                        return;
+                    }
+                    const a = data.article;
+                    document.getElementById('edit_article_id').value = a.id_article;
+                    document.getElementById('edit_article_titre').value = a.titre || '';
+                    document.getElementById('edit_article_content').value = (a.full_content || a.content || '');
+                    const select = document.getElementById('edit_article_categorie');
+                    if (a.id_categorie) {
+                        select.value = a.id_categorie;
+                    } else if (a.categorie) {
+                        // fallback: some payloads expose category id under `categorie`
+                        select.value = a.categorie;
+                    }
+                    const img = document.getElementById('editArticleImagePreview');
+                    if (a.image) {
+                        img.src = a.image;
+                        img.style.display = 'inline-block';
+                    } else {
+                        img.removeAttribute('src');
+                        img.style.display = 'none';
+                    }
+                    document.getElementById('editArticleError').classList.add('d-none');
+                    document.getElementById('editArticleSuccess').classList.add('d-none');
+                    openEditArticleModal();
+                })
+                .catch(() => alert('Erreur de connexion au serveur.'));
+        }
+
+        function submitEditArticle() {
+            const form = document.getElementById('editArticleForm');
+            const formData = new FormData(form);
+            const err = document.getElementById('editArticleError');
+            const ok = document.getElementById('editArticleSuccess');
+            err.classList.add('d-none');
+            ok.classList.add('d-none');
+
+            if (!formData.get('titre') || !formData.get('content') || !formData.get('id_categorie')) {
+                err.textContent = 'Veuillez remplir tous les champs obligatoires.';
                 err.classList.remove('d-none');
-            });
-    }
+                return;
+            }
 
-    function submitEditCategory() {
-        const form = document.getElementById('editCategoryForm');
-        const formData = new FormData(form);
-        const err = document.getElementById('editCategoryError');
-        const ok = document.getElementById('editCategorySuccess');
-        err.classList.add('d-none');
-        ok.classList.add('d-none');
+            formData.append('ajax_action', 'update_article');
 
-        if (!formData.get('nom')) {
-            err.textContent = 'Le nom de la catégorie est obligatoire.';
-            err.classList.remove('d-none');
-            return;
+            fetch(window.location.href, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        ok.textContent = 'Article mis à jour avec succès !';
+                        ok.classList.remove('d-none');
+                        setTimeout(() => { closeModal('editArticleModal', 'editArticleModalBackdrop'); location.reload(); }, 1000);
+                    } else {
+                        err.textContent = data.message || 'Erreur lors de la mise à jour de l\'article.';
+                        err.classList.remove('d-none');
+                    }
+                })
+                .catch(() => {
+                    err.textContent = 'Erreur de connexion au serveur.';
+                    err.classList.remove('d-none');
+                });
         }
 
-        formData.append('ajax_action', 'update_category');
+        function submitEditCategory() {
+            const form = document.getElementById('editCategoryForm');
+            const formData = new FormData(form);
+            const err = document.getElementById('editCategoryError');
+            const ok = document.getElementById('editCategorySuccess');
+            err.classList.add('d-none');
+            ok.classList.add('d-none');
 
-        fetch(window.location.href, { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    ok.textContent = 'Catégorie mise à jour avec succès !';
-                    ok.classList.remove('d-none');
-                    setTimeout(() => { closeModal('editCategoryModal', 'editCategoryModalBackdrop'); location.reload(); }, 1000);
-                } else {
-                    err.textContent = data.message || 'Erreur lors de la mise à jour de la catégorie.';
-                    err.classList.remove('d-none');
-                }
-            })
-            .catch(() => {
-                err.textContent = 'Erreur de connexion au serveur.';
+            if (!formData.get('nom')) {
+                err.textContent = 'Le nom de la catégorie est obligatoire.';
                 err.classList.remove('d-none');
-            });
-    }
-</script>
+                return;
+            }
+
+            formData.append('ajax_action', 'update_category');
+
+            fetch(window.location.href, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        ok.textContent = 'Catégorie mise à jour avec succès !';
+                        ok.classList.remove('d-none');
+                        setTimeout(() => { closeModal('editCategoryModal', 'editCategoryModalBackdrop'); location.reload(); }, 1000);
+                    } else {
+                        err.textContent = data.message || 'Erreur lors de la mise à jour de la catégorie.';
+                        err.classList.remove('d-none');
+                    }
+                })
+                .catch(() => {
+                    err.textContent = 'Erreur de connexion au serveur.';
+                    err.classList.remove('d-none');
+                });
+        }
+    </script>
 </body>
 </html>
