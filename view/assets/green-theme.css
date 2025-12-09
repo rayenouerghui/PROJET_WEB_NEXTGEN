@@ -1,0 +1,71 @@
+:root {
+  --brand-green: #16a34a; /* Tailwind green-600 */
+  --brand-green-dark: #065f46; /* green-800 */
+  --brand-green-light: #dcfce7; /* green-50 */
+  --brand-white: #ffffff;
+}
+
+/* Base background/text */
+body {
+  background-color: var(--brand-white) !important;
+  color: var(--brand-green-dark) !important;
+}
+
+/* Links and text accents */
+a, a * {
+  color: var(--brand-green-dark) !important;
+}
+
+/* Buttons / backgrounds that used other color families -> unify to green */
+.bg-red-500, .bg-red-50, .bg-red-100,
+.bg-blue-50, .bg-blue-100,
+.bg-teal-50, .bg-teal-100, .bg-teal-600,
+.bg-cyan-600, .bg-orange-100, .bg-yellow-50,
+.bg-yellow-100 {
+  background-color: var(--brand-green) !important;
+}
+
+.text-red-600, .text-blue-600, .text-teal-600, .text-cyan-600, .text-orange-600, .text-yellow-600 {
+  color: var(--brand-green-dark) !important;
+}
+
+/* Small variant backgrounds (icons, badges) */
+.bg-green-100, .bg-green-50 { background-color: var(--brand-green-light) !important; }
+
+/* Gradient utilities used in templates: override gradient color variables used by Tailwind's CDN */
+.from-teal-500 { --tw-gradient-from: var(--brand-green); }
+.to-cyan-600 { --tw-gradient-to: var(--brand-green-dark); }
+.from-red-500 { --tw-gradient-from: var(--brand-green); }
+.to-pink-600 { --tw-gradient-to: var(--brand-green-dark); }
+
+/* Rings / borders */
+.ring-red-500, .ring-red-600 { box-shadow: 0 0 0 3px rgba(22,163,74,0.15) !important; }
+.ring-teal-500 { box-shadow: 0 0 0 3px rgba(22,163,74,0.15) !important; }
+
+/* Ensure cards and panels keep white background with green text */
+.bg-white { background-color: var(--brand-white) !important; }
+.text-gray-800, .text-gray-700, .text-gray-500, .text-gray-600 { color: var(--brand-green-dark) !important; }
+
+/* Override utility classes that are often used as accent colors */
+.text-teal-600, .text-green-600 { color: var(--brand-green-dark) !important; }
+.bg-teal-600, .bg-green-600 { background-color: var(--brand-green) !important; }
+
+/* Keep high-contrast white buttons readable */
+.bg-white.text-teal-600 { color: var(--brand-green-dark) !important; }
+
+/* Fallback: apply to any class attribute containing color family names (broad stroke) */
+[class*="-red-"] { color: var(--brand-green-dark) !important; }
+[class*="-blue-"] { color: var(--brand-green-dark) !important; }
+[class*="-teal-"] { color: var(--brand-green-dark) !important; }
+[class*="-cyan-"] { color: var(--brand-green-dark) !important; }
+[class*="-orange-"] { color: var(--brand-green-dark) !important; }
+[class*="-yellow-"] { color: var(--brand-green-dark) !important; }
+
+/* Minor adjustments for inputs, badges */
+input, textarea, select { border-color: rgba(6,95,70,0.12) !important; }
+.badge { background-color: var(--brand-green-light) !important; color: var(--brand-green-dark) !important; }
+
+/* Keep images and avatars unchanged but add a green ring when used */
+img[alt] { outline-color: transparent; }
+
+/* End of theme overrides */
