@@ -1,0 +1,29 @@
+# Configuration du système d'IA
+
+## Chemins
+PYTHON_PATH = "python3"  # ou "python" sur Windows
+AI_MODULE_PATH = "ai_module/analyse_reclamation.py"
+
+## Scores de seuil
+SCORE_ACCEPT_MIN = 0.70      # Score minimum pour accepter un message
+SCORE_REJECT_MAX = 0.40      # Score maximum pour rejeter un message
+# Entre 0.40 et 0.70 = demander réécriture
+
+## Poids des modèles
+WEIGHT_NAIVE_BAYES = 0.50    # 50%
+WEIGHT_MARKOV = 0.30         # 30%
+WEIGHT_WORD2VEC = 0.20       # 20%
+
+## Limites de longueur
+MIN_MESSAGE_LENGTH = 5       # Caractères minimum
+MIN_MESSAGE_WORDS = 1        # Mots minimum
+
+## Détection de non-sens
+MAX_REPETITIVE_CHARS = 3     # Maximal de caractères répétés
+MAX_REPETITIVE_WORDS = 0.3   # Pourcentage max de mots répétitifs
+
+## Comportement
+ENABLE_AI = true             # Activer le système d'IA
+FALLBACK_TO_PHP = true       # Basculer vers PHP si Python échoue
+LOG_ANALYSIS = true          # Logger les analyses
+DEBUG_MODE = false           # Mode débogage (affiche plus d'infos)
