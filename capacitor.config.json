@@ -1,0 +1,17 @@
+{
+    "appId": "com.nextgen.admin",
+    "appName": "NextGen Admin",
+    "webDir": "public",
+    "server": {
+        "androidScheme": "https",
+        "hostname": "localhost"
+    },
+    "android": {
+        "flavor": "main",
+        "buildOptions": {
+            "keystorePath": "",
+            "keystoreAlias": "",
+            "releaseType": "APK"
+        }
+    }
+}

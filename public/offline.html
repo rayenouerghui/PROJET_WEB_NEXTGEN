@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hors ligne - NextGen Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+            color: #e0e0ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .offline-container {
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .offline-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #a5b4fc;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .retry-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📡</div>
+        <h1>Hors ligne</h1>
+        <p>
+            Vous êtes actuellement hors ligne. Veuillez vérifier votre connexion Internet et réessayer.
+        </p>
+        <button class="retry-btn" onclick="window.location.reload()">
+            🔄 Réessayer
+        </button>
+    </div>
+</body>
+
+</html>

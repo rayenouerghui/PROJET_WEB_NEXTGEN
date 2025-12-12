@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextGen Admin - Loading...</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .loader {
+            text-align: center;
+            color: #e0e0ff;
+        }
+
+        .spinner {
+            border: 4px solid rgba(139, 92, 246, 0.2);
+            border-top: 4px solid #8b5cf6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <h1>NextGen Admin</h1>
+        <p>Chargement...</p>
+    </div>
+
+    <script>
+        // PRODUCTION - ngrok tunnel (works everywhere: WiFi, 4G, 5G)
+        // ngrok URL: https://gracia-supernormal-shay.ngrok-free.dev
+
+        // USER INTERFACE (not admin)
+        const serverUrl = 'https://gracia-supernormal-shay.ngrok-free.dev/PROJET_WEB_NEXTGEN-main/public/livraisons.php';
+
+        // Smooth redirect
+        setTimeout(() => {
+            window.location.href = serverUrl;
+        }, 500);
+    </script>
+</body>
+
+</html>

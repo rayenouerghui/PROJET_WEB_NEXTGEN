@@ -1,0 +1,150 @@
+/* Additional styles for order cards and status badges */
+
+.order-card {
+    cursor: pointer;
+    position: relative;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge.status-preparée {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-badge.status-en_route {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.status-livrée {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-badge.status-annulée {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-track {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-track:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+}
+
+.empty-state,
+.error-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.empty-state i,
+.error-state i {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+code {
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+/* Camera overlay styles */
+#camera-controls {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2001;
+    max-width: 90%;
+}
+
+.camera-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 1rem;
+    border-radius: 12px;
+    justify-content: center;
+}
+
+.camera-toolbar button {
+    padding: 0.75rem 1.25rem;
+    background: var(--primary);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.camera-toolbar button:hover {
+    background: var(--primary-dark);
+    transform: scale(1.05);
+}
+
+.camera-toolbar button i {
+    font-size: 1.2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #camera-controls {
+        bottom: 1rem;
+        max-width: 95%;
+    }
+
+    .camera-toolbar {
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .camera-toolbar button {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 769px) {
+
+    /* PC-specific styles */
+    .camera-toolbar {
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+
+    .camera-toolbar button {
+        padding: 0.85rem 1.5rem;
+    }
+}

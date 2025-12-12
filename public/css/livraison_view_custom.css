@@ -1,0 +1,244 @@
+/* Frontoffice Livraison View Custom Styles */
+
+html,
+body {
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    height: auto !important;
+    min-height: 100vh;
+}
+
+body {
+    background: url('/PROJET_WEB_NEXTGEN-main/public/images/bg-jeux.gif') no-repeat center center fixed !important;
+    background-size: cover !important;
+    margin: 0;
+    color: white;
+    font-family: 'Inter', sans-serif;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: -1;
+}
+
+main {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 800;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.card {
+    background: linear-gradient(135deg, rgba(56, 28, 135, 0.95), rgba(59, 7, 100, 0.9));
+    border-radius: 1.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(139, 92, 246, 0.6);
+    color: white;
+}
+
+.btn {
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+}
+
+.btn.primary {
+    background: linear-gradient(45deg, #8b5cf6, #ec4899);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+    color: white;
+}
+
+.btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(236, 72, 153, 0.8);
+}
+
+.btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn.danger {
+    background: linear-gradient(45deg, #ef4444, #b91c1c);
+    color: white;
+}
+
+input,
+select,
+textarea {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(139, 92, 246, 0.4) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #ec4899 !important;
+    box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
+}
+
+.commandes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.commande-card {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s;
+}
+
+.commande-card:hover {
+    transform: translateY(-5px);
+    border-color: #8b5cf6;
+}
+
+.livraison-card {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #8b5cf6;
+}
+
+.badge {
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.badge::before {
+    content: '';
+    font-size: 1rem;
+}
+
+.badge-preparée {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.badge-preparée::before {
+    content: '📦';
+}
+
+.badge-en_route {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    animation: deliveryPulse 2s ease-in-out infinite;
+}
+
+.badge-en_route::before {
+    content: '🚚';
+}
+
+@keyframes deliveryPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
+    }
+}
+
+.badge-livrée {
+    background: linear-gradient(135deg, #ec4899, #db2777);
+    color: white;
+}
+
+.badge-livrée::before {
+    content: '✅';
+}
+
+.badge-annulée {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    opacity: 0.7;
+}
+
+.badge-annulée::before {
+    content: '❌';
+}
+
+.trajet-map {
+    height: 300px;
+    border-radius: 1rem;
+    margin-top: 1rem;
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    position: relative;
+    touch-action: pan-y !important;
+    /* Allow vertical scrolling on touch devices */
+}
+
+.trajet-map canvas {
+    touch-action: pan-y !important;
+    /* Allow page scroll even when touching map */
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8b5cf6;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ec4899;
+}

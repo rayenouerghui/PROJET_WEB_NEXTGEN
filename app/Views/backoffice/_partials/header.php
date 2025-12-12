@@ -7,10 +7,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/common.css">
+    <link rel="stylesheet" href="/PROJET_WEB_NEXTGEN-main/public/css/common.css">
     <?php if (isset($extraCss)): ?>
         <?php foreach ($extraCss as $css): ?>
-            <link rel="stylesheet" href="../../backoffice/<?php echo $css; ?>">
+            <link rel="stylesheet" href="/PROJET_WEB_NEXTGEN-main/public/<?php echo ltrim($css, '/'); ?>">
         <?php endforeach; ?>
     <?php endif; ?>
     <style>
@@ -124,10 +124,10 @@
         <nav>
             <div class="logo">NextGen Gaming</div>
             <ul>
-                <li><a href="../../backoffice/">Dashboard</a></li>
-                <li><a href="../../backoffice/matchmaking.php">Matchmaking</a></li>
-                <li><a href="../../backoffice/users">Users</a></li>
-                <li><a href="../../backoffice/games">Games</a></li>
+                <li><a href="/PROJET_WEB_NEXTGEN-main/public/backoffice/index.php">Dashboard</a></li>
+                <li><a href="/PROJET_WEB_NEXTGEN-main/public/backoffice/livraisons.php">Livraisons</a></li>
+                <li><a href="/PROJET_WEB_NEXTGEN-main/public/backoffice/trajets.php">Trajets</a></li>
+                <li><a href="/PROJET_WEB_NEXTGEN-main/public/backoffice/users.php">Users</a></li>
             </ul>
         </nav>
     </header>

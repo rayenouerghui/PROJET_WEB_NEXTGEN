@@ -1,0 +1,184 @@
+/* ============================================
+   ADDITIONAL VISUAL ENHANCEMENTS
+   Better empty states & loading animations
+   ============================================ */
+
+/* ENHANCED EMPTY STATE */
+.table tbody tr td[colspan] {
+    padding: 3rem 2rem !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(236, 72, 153, 0.05));
+    border-radius: 12px;
+}
+
+.table tbody tr td[colspan] i {
+    animation: floatEmpty 3s ease-in-out infinite;
+}
+
+@keyframes floatEmpty {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: translateY(-10px);
+        opacity: 0.8;
+    }
+}
+
+/* ENHANCED ICON ANIMATIONS IN STATS */
+.avatar-title i {
+    display: inline-block;
+    animation: iconBounce 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+@keyframes iconBounce {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    25% {
+        transform: translateY(-3px) rotate(-3deg);
+    }
+
+    75% {
+        transform: translateY(-3px) rotate(3deg);
+    }
+}
+
+/* IMPROVED ACTION BUTTON GROUP */
+.table .d-flex.gap-1 {
+    gap: 0.35rem !important;
+}
+
+.table .btn-sm {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 6px !important;
+}
+
+.table .btn-sm:hover {
+    transform: translateY(-2px) scale(1.1);
+    z-index: 10;
+}
+
+.table .btn-sm:active {
+    transform: translateY(0) scale(0.95);
+}
+
+/* ENHANCED FORM SELECT WITH GRADIENT */
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%238b5cf6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 16px 12px !important;
+}
+
+.form-select:hover {
+    border-color: rgba(139, 92, 246, 0.5) !important;
+}
+
+/* SMOOTH FADE IN FOR TABLE ROWS */
+.table tbody tr {
+    animation: fadeInRow 0.4s ease-out backwards;
+}
+
+.table tbody tr:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.table tbody tr:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.table tbody tr:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.table tbody tr:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.table tbody tr:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.table tbody tr:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+.table tbody tr:nth-child(7) {
+    animation-delay: 0.35s;
+}
+
+.table tbody tr:nth-child(8) {
+    animation-delay: 0.4s;
+}
+
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ENHANCED HEADER TITLES */
+.card-header .header-title {
+    position: relative;
+    display: inline-block;
+}
+
+.card-header .header-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gradient-purple-pink);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover .card-header .header-title::after {
+    width: 100%;
+}
+
+/* SMOOTH BADGE TRANSITIONS */
+.badge {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.badge:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+/* BETTER TEXT SELECTION */
+::selection {
+    background: rgba(139, 92, 246, 0.4);
+    color: #fff;
+}
+
+::-moz-selection {
+    background: rgba(139, 92, 246, 0.4);
+    color: #fff;
+}
+
+/* OPTIMIZED WILL-CHANGE FOR PERFORMANCE */
+.btn,
+.card,
+.table tbody tr,
+.form-control,
+.form-select {
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+}

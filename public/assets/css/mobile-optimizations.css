@@ -1,0 +1,143 @@
+/* ========================================
+   MOBILE APP PERFORMANCE OPTIMIZATIONS
+   For smooth 60fps experience on Android
+   ======================================== */
+
+/* 1. HARDWARE ACCELERATION */
+* {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* 2. SMOOTH SCROLLING */
+html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* 3. REDUCE ANIMATION DURATIONS FOR MOBILE */
+* {
+    animation-duration: 0.3s !important;
+    transition-duration: 0.25s !important;
+}
+
+/* 4. OPTIMIZE IMAGES */
+img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* 5. OPTIMIZE TOUCH INTERACTIONS */
+a,
+button,
+input,
+select,
+textarea {
+    -webkit-tap-highlight-color: rgba(139, 92, 246, 0.2);
+    touch-action: manipulation;
+}
+
+/* Remove 300ms tap delay */
+* {
+    touch-action: manipulation;
+}
+
+/* 6. OPTIMIZE WILL-CHANGE FOR ANIMATIONS */
+.card,
+.btn,
+.form-control {
+    will-change: transform, opacity;
+}
+
+/* 7. REDUCE BLUR EFFECTS (GPU INTENSIVE) */
+.backdrop-blur,
+.glass-effect {
+    backdrop-filter: blur(5px) !important;
+    /* Reduced from higher values */
+}
+
+/* 8. OPTIMIZE SHADOWS */
+.card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    /* Lighter shadows */
+}
+
+/* 9. DISABLE ANIMATIONS ON LOW-END DEVICES */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 10. OPTIMIZE LOADING STATES */
+.loading {
+    contain: layout style paint;
+}
+
+/* 11. SMOOTHER MAP INTERACTIONS */
+#map,
+.leaflet-container {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* 12. OPTIMIZE LIST RENDERING */
+.table tbody tr {
+    contain: layout style;
+}
+
+/* 13. PREVENT LAYOUT SHIFTS */
+img,
+video,
+iframe {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* 14. OPTIMIZE FONTS */
+@font-face {
+    font-display: swap;
+    /* Use system font until custom font loads */
+}
+
+/* 15. REDUCE GLOW EFFECTS */
+.glow,
+.neon-glow {
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5)) !important;
+    /* Reduced from more intense glows */
+}
+
+/* 16. FASTER TRANSITIONS */
+.fast-transition {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 17. OPTIMIZE FIXED ELEMENTS */
+.fixed-top,
+.fixed-bottom,
+.sticky-top {
+    will-change: transform;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* 18. REDUCE GRADIENT COMPLEXITY */
+.gradient-bg {
+    background: linear-gradient(135deg, #0f0f1a, #1a1a2e) !important;
+    /* Simpler gradients perform better */
+}
