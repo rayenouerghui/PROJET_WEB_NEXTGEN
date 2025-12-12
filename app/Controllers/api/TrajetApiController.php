@@ -115,7 +115,7 @@ class TrajetApiController {
                 'position_lng' => null,
             ];
             
-            $sql = "INSERT INTO trajet (id_livraison, fournisseur_api, identifiant_suivi, statut_realtime, position_lat, position_lng) 
+            $sql = "INSERT INTO trajets (id_livraison, fournisseur_api, identifiant_suivi, statut_realtime, position_lat, position_lng) 
                     VALUES (:id_livraison, :fournisseur_api, :identifiant_suivi, :statut_realtime, :position_lat, :position_lng)";
             $stmt = $this->db->prepare($sql);
             $stmt->execute($trajetData);
@@ -130,7 +130,7 @@ class TrajetApiController {
     }
 
     private function updateTrajet(int $id, array $liveData): void {
-        $updateSql = "UPDATE trajet 
+        $updateSql = "UPDATE trajets 
                       SET position_lat = :lat, 
                           position_lng = :lng, 
                           statut_realtime = :statut,
@@ -158,3 +158,5 @@ class TrajetApiController {
         $completeStmt->execute([':id' => $idLivraison]);
     }
 }
+
+

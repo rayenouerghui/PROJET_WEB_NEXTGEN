@@ -504,7 +504,7 @@ class LivraisonController {
     }
 
     private function deleteTrajetsByLivraison(int $idLivraison): void {
-        $stmt = $this->db->prepare('DELETE FROM trajet WHERE id_livraison = :id');
+        $stmt = $this->db->prepare('DELETE FROM trajets WHERE id_livraison = :id');
         $stmt->execute([':id' => $idLivraison]);
     }
 
@@ -524,7 +524,7 @@ class LivraisonController {
 
     private function insertTrajet(array $data): ?int {
         $stmt = $this->db->prepare('
-            INSERT INTO trajet (
+            INSERT INTO trajets (
                 id_livraison, fournisseur_api, identifiant_suivi,
                 statut_realtime, position_lat, position_lng, route_json, current_index
             ) VALUES (
@@ -547,7 +547,7 @@ class LivraisonController {
 
     private function updateTrajetPosition(int $id, array $data): void {
         $stmt = $this->db->prepare('
-            UPDATE trajet
+            UPDATE trajets 
             SET statut_realtime = :statut,
                 position_lat = :lat,
                 position_lng = :lng,
@@ -580,3 +580,6 @@ class LivraisonController {
         return ($row['count'] ?? 0) > 0;
     }
 }
+
+
+

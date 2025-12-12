@@ -181,7 +181,7 @@ class LivraisonAdminController {
     }
 
     private function insertTrajet(array $data): int {
-        $sql = "INSERT INTO trajet (id_livraison, fournisseur_api, identifiant_suivi, statut_realtime, position_lat, position_lng) 
+        $sql = "INSERT INTO trajets (id_livraison, fournisseur_api, identifiant_suivi, statut_realtime, position_lat, position_lng) 
                 VALUES (:id_livraison, :fournisseur_api, :identifiant_suivi, :statut_realtime, :position_lat, :position_lng)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute($data);
@@ -189,7 +189,7 @@ class LivraisonAdminController {
     }
 
     private function updateTrajetPosition(int $id, array $data): bool {
-        $sql = "UPDATE trajet SET 
+        $sql = "UPDATE trajets SET 
                 statut_realtime = :statut_realtime, 
                 position_lat = :position_lat, 
                 position_lng = :position_lng, 
@@ -433,4 +433,6 @@ class LivraisonAdminController {
         return ['Livraison confirmée et suivi initialisé', 'success'];
     }
 }
+
+
 

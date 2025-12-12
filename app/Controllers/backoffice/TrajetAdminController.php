@@ -71,7 +71,7 @@ class TrajetAdminController {
     }
 
     private function updateTrajetPosition(int $id, array $data): bool {
-        $sql = "UPDATE trajet SET statut_realtime = :statut_realtime, position_lat = :position_lat, position_lng = :position_lng, derniere_mise_a_jour = NOW() WHERE id_trajet = :id";
+        $sql = "UPDATE trajets SET statut_realtime = :statut_realtime, position_lat = :position_lat, position_lng = :position_lng, derniere_mise_a_jour = NOW() WHERE id_trajet = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':statut_realtime' => $data['statut_realtime'],
@@ -124,4 +124,6 @@ class TrajetAdminController {
         return $stmt->execute([':id' => $id]);
     }
 }
+
+
 
