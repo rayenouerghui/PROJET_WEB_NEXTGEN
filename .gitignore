@@ -9,3 +9,11 @@
 
 # Safety: never include nested git metadata if present
 nextgen/.git/
+
+# Keep repo clean
+nextgen/**/*.bak
+
+# Ignore duplicate local SQL exports (keep nextgen_db_complete.sql which is tracked)
+nextgen/nextgen_db (6).sql
+nextgen/nextgen_db*.sql
+!nextgen/nextgen_db_complete.sql
