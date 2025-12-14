@@ -1,0 +1,11 @@
+# Track only the NextGen module and repo-level docs
+*
+
+!.gitignore
+!README.md
+
+!nextgen/
+!nextgen/**
+
+# Safety: never include nested git metadata if present
+nextgen/.git/
