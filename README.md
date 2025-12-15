@@ -123,3 +123,12 @@ Modern PHP application for gaming, deliveries, events, blog, and reclamations, o
 - Follow MVC file placement: controllers/models/views/services/config
 - Reuse shared partials and styles
 - Keep mobile-first styles and meta tags consistent across all pages
+
+## Screenshots
+- <img width="940" height="788" alt="logo" src="https://github.com/user-attachments/assets/594b4613-e83d-4bfb-a73f-bbfdf92d2917" />
+- <img width="1842" height="986" alt="page d&#39;acceuil" src="https://github.com/user-attachments/assets/fc83ccb3-3ff1-4b99-b23d-b264bc0f7a47" />
+- <img width="1850" height="892" alt="liste des produits" src="https://github.com/user-attachments/assets/290a2c88-ef93-4234-961b-45ecce5f9cee" />
+- <img width="1856" height="982" alt="espace livraison" src="https://github.com/user-attachments/assets/96f0b07a-ce23-4c71-9d10-44e4aedd185b" />
+
+
+
