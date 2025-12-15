@@ -30,6 +30,8 @@ $colorMap = [
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
@@ -42,6 +44,7 @@ $colorMap = [
     .sidebar-open { width: 16rem; }
     @keyframes truck-drive { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
     .animate-truck { animation: truck-drive 0.5s ease-in-out infinite; }
+    .admin-trajet-mini { height: 140px; width: 320px; max-width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid rgba(139,92,246,0.35); background: rgba(0,0,0,0.25); }
   </style>
 </head>
 <body class="h-full" x-data="{ sidebarOpen: true, showCreateModal: false }">
@@ -215,15 +218,19 @@ $colorMap = [
                     <span class="px-3 py-1 rounded-full text-xs font-bold text-white <?= $bgColor ?>"><?= ucfirst($l['statut']) ?></span>
                   </td>
                   <td class="px-6 py-5">
+                    <?php 
+                      $hasCoordsAdmin = !empty($l['position_lat']) && !empty($l['position_lng']);
+                      $canPreviewAdmin = !empty($l['trajet']) || $hasCoordsAdmin;
+                    ?>
                     <?php if (!empty($l['trajet'])): ?>
-                      <span class="text-green-400 text-xs flex items-center gap-1.5">
+                      <button type="button" onclick="openTrackingFullscreen(<?= $l['id_livraison'] ?>)" class="text-green-400 text-xs flex items-center gap-1.5 hover:text-green-300 transition">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                           <circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
                           <path d="M7 2 L7 0 M7 14 L7 12 M2 7 L0 7 M14 7 L12 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                           <circle cx="7" cy="7" r="1" fill="currentColor"/>
                         </svg>
                         <span>GPS Actif</span>
-                      </span>
+                      </button>
                     <?php else: ?>
                       <span class="text-gray-500 text-xs flex items-center gap-1.5">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -231,6 +238,15 @@ $colorMap = [
                         </svg>
                         <span>Non initialisé</span>
                       </span>
+                    <?php endif; ?>
+
+                    <?php if ($canPreviewAdmin): ?>
+                      <div class="admin-trajet-mini mt-3" id="admin-mini-map-<?= (int)$l['id_livraison'] ?>"
+                           data-id="<?= (int)$l['id_livraison'] ?>"
+                           data-lat="<?= htmlspecialchars($l['position_lat'] ?? '') ?>"
+                           data-lng="<?= htmlspecialchars($l['position_lng'] ?? '') ?>"
+                           data-current-lat="<?= htmlspecialchars($l['trajet']['position_lat'] ?? ($l['position_lat'] ?? '')) ?>"
+                           data-current-lng="<?= htmlspecialchars($l['trajet']['position_lng'] ?? ($l['position_lng'] ?? '')) ?>"></div>
                     <?php endif; ?>
                   </td>
                   <td class="px-6 py-5">
@@ -251,7 +267,8 @@ $colorMap = [
                       // Make status comparison case-insensitive
                       $statusLower = strtolower(trim($l['statut']));
                       $isConfirmable = in_array($statusLower, ['commandee', 'commandée', 'preparee', 'preparée', 'préparée']);
-                      $isTracking = in_array($statusLower, ['en_route', 'en route', 'enroute', 'livree', 'livrée']);
+                      $isTracking = in_array($statusLower, ['en_transit', 'en transit', 'en_route', 'en route', 'enroute', 'livree', 'livrée']);
+                      $canOpenTracking = !empty($l['trajet']) || (!empty($l['position_lat']) && !empty($l['position_lng']));
                       ?>
                       
                       <!-- CONFIRMER BUTTON - Confirms and starts real-time delivery -->
@@ -271,7 +288,7 @@ $colorMap = [
                       <?php endif; ?>
                       
                       <!-- SUIVI LIVE BUTTON - Opens fullscreen tracking page -->
-                      <?php if ($isTracking): ?>
+                      <?php if ($canOpenTracking): ?>
                         <button onclick="openTrackingFullscreen(<?= $l['id_livraison'] ?>)" 
                                 class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-blue-500/50 flex items-center gap-2">
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -470,6 +487,73 @@ function deleteLivraison(id) {
         }
     });
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    var els = document.querySelectorAll('.admin-trajet-mini');
+    if (!els || !els.length || typeof maplibregl === 'undefined') return;
+
+    els.forEach(function (el) {
+        var livraisonId = parseInt(el.getAttribute('data-id') || '0', 10);
+        var destLat = parseFloat(el.getAttribute('data-lat') || '0');
+        var destLng = parseFloat(el.getAttribute('data-lng') || '0');
+        var curLat = parseFloat(el.getAttribute('data-current-lat') || destLat.toString());
+        var curLng = parseFloat(el.getAttribute('data-current-lng') || destLng.toString());
+        if (!livraisonId || !destLat || !destLng) return;
+
+        var map = new maplibregl.Map({
+            container: el.id,
+            style: {
+                version: 8,
+                sources: {
+                    'osm': {
+                        type: 'raster',
+                        tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        tileSize: 256,
+                        attribution: '© OpenStreetMap contributors'
+                    }
+                },
+                layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+            },
+            center: [destLng, destLat],
+            zoom: 11,
+            pitch: 0,
+            bearing: 0,
+            interactive: false
+        });
+
+        var truckMarker = null;
+
+        map.on('load', function () {
+            var destEl = document.createElement('div');
+            destEl.style.width = '10px';
+            destEl.style.height = '10px';
+            destEl.style.borderRadius = '999px';
+            destEl.style.background = '#ec4899';
+            destEl.style.boxShadow = '0 0 12px rgba(236,72,153,0.55)';
+            new maplibregl.Marker({ element: destEl, anchor: 'center' }).setLngLat([destLng, destLat]).addTo(map);
+
+            var truckEl = document.createElement('div');
+            truckEl.style.width = '10px';
+            truckEl.style.height = '10px';
+            truckEl.style.borderRadius = '999px';
+            truckEl.style.background = '#00ffc3';
+            truckEl.style.boxShadow = '0 0 12px rgba(0,255,195,0.45)';
+            truckMarker = new maplibregl.Marker({ element: truckEl, anchor: 'center' }).setLngLat([curLng, curLat]).addTo(map);
+        });
+
+        function refresh() {
+            fetch('../api/trajet.php?id_livraison=' + livraisonId)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data || data.error || !data.trajet || !truckMarker) return;
+                    truckMarker.setLngLat([data.trajet.position_lng, data.trajet.position_lat]);
+                })
+                .catch(function () {});
+        }
+
+        setInterval(refresh, 3000);
+    });
+});
 </script>
 
 </body>

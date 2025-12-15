@@ -1,0 +1,205 @@
+/* ========================================
+   MOBILE RESPONSIVE STYLES
+   For NextGen Android WebView App
+   ======================================== */
+
+/* Base Mobile Viewport */
+@viewport {
+    width: device-width;
+    zoom: 1.0;
+}
+
+/* Ensure proper scaling */
+html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+}
+
+/* Remove horizontal scrolling */
+* {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* ===== RESPONSIVE CONTAINER ===== */
+main {
+    max-width: 100% !important;
+    padding: 1rem !important;
+    margin: 0 !important;
+}
+
+/* ===== HEADER ===== */
+header {
+    margin-bottom: 1.5rem !important;
+}
+
+header h1 {
+    font-size: 1.75rem !important; /* Smaller on mobile */
+}
+
+header p {
+    font-size: 0.95rem !important;
+}
+
+/* ===== CARDS ===== */
+.card {
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 12px !important;
+}
+
+/* ===== GRIDS ===== */
+.commandes-grid {
+    grid-template-columns: 1fr !important; /* Single column on mobile */
+    gap: 1rem !important;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    padding: 10px 20px !important;
+    font-size: 0.9rem !important;
+    width: 100% !important; /* Full-width buttons on mobile */
+    margin-bottom: 0.5rem;
+}
+
+/* Voice Button - Adjust for mobile */
+.voice-btn-float {
+    width: 60px !important;
+    height: 60px !important;
+    bottom: 1rem !important;
+    right: 1rem !important;
+}
+
+.voice-icon {
+    font-size: 1.5rem !important;
+}
+
+#voice-indicator-float {
+    bottom: 6rem !important;
+    right: 1rem !important;
+    max-width: calc(100vw - 2rem) !important;
+    font-size: 0.85rem !important;
+}
+
+/* ===== MAPS ===== */
+.trajet-map,
+#pickerMap {
+    height: 200px !important; /* Shorter on mobile */
+    border-radius: 8px !important;
+}
+
+/* ===== FORMS ===== */
+textarea,
+select,
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 10px !important;
+}
+
+/* ===== COMMANDE CARDS ===== */
+.commande-card,
+.livraison-card {
+    padding: 1rem !important;
+}
+
+.commande-card h3 {
+    font-size: 1.1rem !important;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    font-size: 0.75rem !important;
+    padding: 4px 12px !important;
+}
+
+/* ===== TABLES (if any) ===== */
+table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+/* ===== IMAGES ===== */
+img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* ===== MODALS (SweetAlert) ===== */
+.swal2-popup {
+    width: 90% !important;
+    font-size: 0.9rem !important;
+}
+
+/* ===== RESPONSIVE TEXT SIZES ===== */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px !important;
+    }
+    
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.25rem !important; }
+    h3 { font-size: 1.1rem !important; }
+    h4 { font-size: 1rem !important; }
+    
+    .card {
+        padding: 0.75rem !important;
+    }
+}
+
+/* ===== LANDSCAPE MODE ===== */
+@media (orientation: landscape) and (max-height: 500px) {
+    header {
+        margin-bottom: 1rem !important;
+    }
+    
+    .trajet-map,
+    #pickerMap {
+        height: 150px !important;
+    }
+    
+    .voice-btn-float {
+        width: 50px !important;
+        height: 50px !important;
+    }
+}
+
+/* ===== HIDE ELEMENTS ON SMALL SCREENS ===== */
+@media (max-width: 360px) {
+    header p:last-child {
+        display: none; /* Hide subtitle on very small phones */
+    }
+}
+
+/* ===== TOUCH-FRIENDLY ELEMENTS ===== */
+button,
+a,
+.clickable {
+    min-height: 44px !important; /* Apple's recommended touch target */
+    min-width: 44px !important;
+}
+
+/* Remove tap highlight color */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== FIX STICKY ELEMENTS ===== */
+.sticky,
+.fixed {
+    position: relative !important; /* Convert fixed to relative on mobile */
+}
+
+/* Keep voice button fixed */
+.voice-btn-float {
+    position: fixed !important;
+}

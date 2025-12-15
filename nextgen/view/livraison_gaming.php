@@ -2,7 +2,10 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#8b5cf6">
     <title>Mes livraisons - NextGen</title>
     
     <!-- Fonts & Icons -->
@@ -23,87 +26,183 @@
 
     <style>
         :root {
-            --primary: #8b5cf6; --secondary: #ec4899; --accent: #00ffc3;
-            --dark: #0f0c29; --darker: #1a1a2e;
+            --primary: #8b5cf6;
+            --secondary: #ec4899;
+            --accent: #00ffc3;
+            --dark: #0f0c29;
+            --darker: #1a1a2e;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, var(--dark), var(--darker), #302b63);
-            min-height: 100vh; color: #e0e7ff; padding: 2rem;
+            min-height: 100vh;
+            color: #e0e7ff;
+            padding: 1rem;
+            overflow-x: hidden;
         }
-        main { max-width: 1200px; margin: 0 auto; }
-        
-        header { text-align: center; margin-bottom: 3rem; }
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
         header p:first-child { color: var(--secondary); font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
-        header h1 { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: white; text-shadow: 0 0 20px rgba(139,92,246,0.5); margin: 0.5rem 0; }
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            color: white;
+            text-shadow: 0 0 20px rgba(139,92,246,0.5);
+            margin: 0.5rem 0;
+            word-wrap: break-word;
+        }
         header p:last-child { font-size: 1.1rem; color: #a5b4fc; }
         header span { color: var(--accent); }
-        
         .card {
-            background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
-            border-radius: 20px; padding: 2rem; margin-bottom: 2rem;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
             border: 1px solid rgba(139,92,246,0.2);
+            width: 100%;
         }
-        
-        .btn { padding: 12px 24px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
         .btn.primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
         .btn.secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
         .btn.danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        
-        .commandes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .commandes-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        @media (min-width: 768px) {
+            .commandes-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 1024px) {
+            .commandes-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
         .commande-card {
-            background: rgba(0,0,0,0.3); border-radius: 16px; padding: 1.5rem;
-            border: 1px solid rgba(139,92,246,0.3); transition: all 0.3s;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139,92,246,0.3);
+            transition: all 0.3s;
         }
         .commande-card:hover { border-color: var(--accent); transform: translateY(-5px); }
-        
         .livraison-card {
-            background: rgba(0,0,0,0.3); border-radius: 16px; padding: 1.5rem;
-            border: 1px solid rgba(139,92,246,0.3); margin-bottom: 1.5rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139,92,246,0.3);
+            margin-bottom: 1.5rem;
         }
-        
-        .trajet-map { height: 250px; border-radius: 12px; margin-top: 1rem; }
-        
-        #pickerMap { height: 300px; border-radius: 12px; border: 1px solid rgba(139,92,246,0.5); }
-        
-        textarea, select { 
-            width: 100%; padding: 12px; border-radius: 10px; 
-            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); 
-            color: white; margin-top: 0.5rem;
+        .trajet-map {
+            height: 200px;
+            border-radius: 12px;
+            margin-top: 1rem;
+            width: 100%;
         }
-        
+        .trajet-mini {
+            height: 160px;
+            border-radius: 12px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid rgba(139,92,246,0.35);
+        }
+        #pickerMap {
+            height: 200px;
+            border-radius: 12px;
+            border: 1px solid rgba(139,92,246,0.5);
+            width: 100%;
+        }
+        textarea, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            margin-top: 0.5rem;
+            font-size: 16px;
+        }
         .badge {
-            display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
         }
         .badge-commandee { background: #f59e0b; color: black; }
         .badge-en_transit { background: #3b82f6; color: white; }
         .badge-livree { background: #10b981; color: white; }
-        
-        /* Voice Control Button */
         .voice-btn-float {
-            position: fixed !important; bottom: 2rem !important; right: 2rem !important; 
-            width: 70px !important; height: 70px !important; border-radius: 50% !important;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; 
-            border: none !important; color: white !important; cursor: pointer !important; 
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4) !important; 
-            transition: all 0.3s ease !important; z-index: 99999 !important; 
-            display: flex !important; align-items: center !important; justify-content: center !important;
+            position: fixed !important;
+            bottom: 1rem !important;
+            right: 1rem !important;
+            width: 60px !important;
+            height: 60px !important;
+            border-radius: 50% !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            color: white !important;
+            cursor: pointer !important;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4) !important;
+            transition: all 0.3s ease !important;
+            z-index: 99999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
-        .voice-icon { font-size: 2rem; }
+        .voice-icon { font-size: 1.5rem; }
         .voice-pulse { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba(102, 126, 234, 0.4); opacity: 0; }
-        .voice-btn-float:hover { transform: scale(1.1); box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6); }
         .voice-btn-float.listening { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; animation: buttonPulse 1.5s ease-in-out infinite; }
         .voice-btn-float.listening .voice-pulse { animation: ringPulse 1.5s ease-out infinite; }
         @keyframes buttonPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         @keyframes ringPulse { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2); opacity: 0; } }
         #voice-indicator-float {
-            position: fixed; bottom: 8rem; right: 2rem; background: rgba(0, 0, 0, 0.95); color: white;
-            padding: 1.2rem 1.5rem; border-radius: 16px; font-size: 0.95rem; max-width: 320px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4); z-index: 999; display: none;
+            position: fixed;
+            bottom: 6rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            max-width: calc(100vw - 2rem);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            z-index: 999;
+            display: none;
+        }
+        @media (max-width: 480px) {
+            body { padding: 0.5rem; }
+            .card { padding: 0.75rem; }
+            header h1 { font-size: 1.5rem; }
         }
     </style>
+    <link rel="stylesheet" href="../public/css/mobile-responsive.css">
 </head>
 <body>
 <main>
@@ -274,22 +373,33 @@
 
                     <?php 
                     $statusLower = strtolower($livraison['statut']);
-                    $isTracking = in_array($statusLower, ['en_route', 'en route', 'en_route', 'livree', 'livrée']);
+                    $isTracking = in_array($statusLower, ['en_transit', 'en transit', 'en_route', 'en route', 'livree', 'livrée'], true);
+                    $hasCoords = !empty($livraison['position_lat']) && !empty($livraison['position_lng']);
                     ?>
+
+                    <?php if ($hasCoords): ?>
+                        <div class="trajet-mini" id="mini-map-<?php echo (int)$livraison['id_livraison']; ?>"
+                             data-id="<?php echo (int)$livraison['id_livraison']; ?>"
+                             data-lat="<?php echo $livraison['position_lat']; ?>"
+                             data-lng="<?php echo $livraison['position_lng']; ?>"
+                             data-current-lat="<?php echo $livraison['trajet']['position_lat'] ?? $livraison['position_lat']; ?>"
+                             data-current-lng="<?php echo $livraison['trajet']['position_lng'] ?? $livraison['position_lng']; ?>">
+                        </div>
+                        <div style="display:flex; gap:0.75rem; justify-content:center; margin-top: 1rem; flex-wrap:wrap;">
+                            <a href="tracking.php?id_livraison=<?php echo (int)$livraison['id_livraison']; ?>" 
+                               class="btn primary" style="font-size: 0.95rem; max-width: 320px;" target="_self">
+                                <i class="bi bi-arrows-fullscreen"></i> Plein écran
+                            </a>
+                        </div>
+                    <?php endif; ?>
                     
-                    <?php if ($isTracking && $livraison['position_lat']): ?>
+                    <?php if ($isTracking && $hasCoords): ?>
                         <!-- MAP VISIBLE ONLY AFTER ADMIN CONFIRMS -->
                         <div class="trajet-map" id="map-<?php echo (int)$livraison['id_livraison']; ?>"
                              data-lat="<?php echo $livraison['position_lat']; ?>"
                              data-lng="<?php echo $livraison['position_lng']; ?>"
                              data-current-lat="<?php echo $livraison['trajet']['position_lat'] ?? $livraison['position_lat']; ?>"
                              data-current-lng="<?php echo $livraison['trajet']['position_lng'] ?? $livraison['position_lng']; ?>">
-                        </div>
-                        <div style="text-align: center; margin-top: 1rem;">
-                            <a href="tracking.php?id_livraison=<?php echo (int)$livraison['id_livraison']; ?>" 
-                               class="btn primary" style="font-size: 0.9rem;" target="_blank">
-                                <i class="bi bi-arrows-fullscreen"></i> Plein écran
-                            </a>
                         </div>
                     <?php elseif (in_array($statusLower, ['commandee', 'commandée', 'preparee', 'preparée', 'préparée'])): ?>
                         <!-- MESSAGE WHEN WAITING FOR ADMIN CONFIRMATION -->
@@ -363,6 +473,64 @@
     document.addEventListener('DOMContentLoaded', () => {
         initPickerMap();
 
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Mini tracking previews (always visible when coords exist)
+        document.querySelectorAll('.trajet-mini').forEach(el => {
+            const livraisonId = parseInt(el.dataset.id);
+            const destLat = parseFloat(el.dataset.lat);
+            const destLng = parseFloat(el.dataset.lng);
+            const initialLat = parseFloat(el.dataset.currentLat);
+            const initialLng = parseFloat(el.dataset.currentLng);
+
+            const map = new maplibregl.Map({
+                container: el.id,
+                style: {
+                    version: 8,
+                    sources: {
+                        'osm': {
+                            type: 'raster',
+                            tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                            tileSize: 256,
+                            attribution: '© OpenStreetMap contributors'
+                        }
+                    },
+                    layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+                },
+                center: [destLng, destLat],
+                zoom: isMobile ? 11 : 12,
+                pitch: 0,
+                bearing: 0,
+                interactive: false
+            });
+
+            let truckMarker = null;
+
+            map.on('load', () => {
+                const destEl = document.createElement('div');
+                destEl.innerHTML = '<i class="bi bi-geo-alt-fill" style="font-size: 28px; color: #ec4899;"></i>';
+                new maplibregl.Marker({ element: destEl }).setLngLat([destLng, destLat]).addTo(map);
+
+                const truckEl = document.createElement('div');
+                truckEl.innerHTML = '<i class="bi bi-truck" style="font-size: 26px; color: #00ffc3; filter: drop-shadow(0 4px 8px rgba(0,255,195,0.35));"></i>';
+                truckMarker = new maplibregl.Marker({ element: truckEl }).setLngLat([initialLng, initialLat]).addTo(map);
+            });
+
+            const refresh = async () => {
+                try {
+                    const res = await fetch('api/trajet.php?id_livraison=' + livraisonId);
+                    const data = await res.json();
+                    if (!data || data.error || !data.trajet) return;
+                    if (truckMarker) {
+                        truckMarker.setLngLat([data.trajet.position_lng, data.trajet.position_lat]);
+                    }
+                } catch (e) {
+                }
+            };
+
+            setInterval(refresh, 3000);
+        });
+
         // Init tracking maps with MapLibre
         document.querySelectorAll('.trajet-map').forEach(el => {
             const livraisonId = parseInt(el.id.replace('map-', ''));
@@ -373,9 +541,11 @@
 
             const trackMap = new maplibregl.Map({
                 container: el.id,
-                style: { version: 8, sources: { 'osm': { type: 'raster', tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256 } },
-                         layers: [{ id: 'osm', type: 'raster', source: 'osm' }] },
-                center: [destLng, destLat], zoom: 13
+                style: 'https://demotiles.maplibre.org/style.json',
+                center: [destLng, destLat],
+                zoom: isMobile ? 11 : 12,
+                pitch: isMobile ? 0 : 45,
+                bearing: 0
             });
 
             trackMap.on('load', () => {
@@ -388,6 +558,21 @@
                 const truckEl = document.createElement('div');
                 truckEl.innerHTML = '<i class="bi bi-truck" style="font-size: 28px; color: #667eea; filter: drop-shadow(0 4px 8px rgba(102,126,234,0.6));"></i>';
                 new maplibregl.Marker({ element: truckEl }).setLngLat([curLng, curLat]).addTo(trackMap);
+            });
+
+            trackMap.addControl(new maplibregl.NavigationControl({
+                showCompass: !isMobile,
+                showZoom: true,
+                visualizePitch: !isMobile
+            }), isMobile ? 'bottom-left' : 'top-right');
+
+            if (isMobile) {
+                trackMap.dragRotate.disable();
+                trackMap.touchZoomRotate.disableRotation();
+            }
+
+            window.addEventListener('resize', () => {
+                trackMap.resize();
             });
         });
 
